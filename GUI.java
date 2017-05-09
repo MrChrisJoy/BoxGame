@@ -73,6 +73,7 @@ public class GUI extends Application {
 				case ENTER:
 					generator.generateLevel();
 					level = generator.getEnvironment();
+					movedTo = generator.moveCharacter(1);
 				default:
 					break;
 
