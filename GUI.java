@@ -40,20 +40,19 @@ public class GUI extends Application {
 		// pane auto resizes the children while group cannot
 		Pane pane = new Pane();
 		Scene scene = new Scene(pane, sizeOfGame, sizeOfGame);
-
-		buttonGenerate.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-
-			public void handle(ActionEvent arg0) {
-				buttonGenerate.setVisible(true);
-				generator.generateLevel();
-				level = generator.getEnvironment();
-				changeToImage(level, pane);
-
-			}
-
-		});
-
+//		buttonGenerate.setOnAction(new EventHandler<ActionEvent>() {
+//			@Override
+//
+//			public void handle(ActionEvent arg0) {
+//				buttonGenerate.setVisible(true);
+//				generator.generateLevel();
+//				level = generator.getEnvironment();
+//				
+//
+//			}
+//
+//		});
+		
 		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent key) {
@@ -71,6 +70,9 @@ public class GUI extends Application {
 				case DOWN:
 					movedTo = generator.moveCharacter(3);
 					break;
+				case ENTER:
+					generator.generateLevel();
+					level = generator.getEnvironment();
 				default:
 					break;
 
@@ -87,7 +89,7 @@ public class GUI extends Application {
 		changeToImage(level, pane);
 		// System.out.println(level.length);
 		// System.out.println(level[0].length);
-		pane.getChildren().addAll(buttonGenerate);
+		//pane.getChildren().addAll(buttonGenerate);
 		stage.setScene(scene);
 		stage.show();
 	}
