@@ -11,7 +11,7 @@ public class Sprite extends StackPane {
 		Circle circle = new Circle(width);
 		circle.setStroke(Color.WHITE);
 		rectangle.setStrokeWidth(1);
-		rectangle.setStroke(Color.WHITE);
+		//rectangle.setStroke(Color.WHITE);
 		switch (blockNum) {
 		case 1:
 			blockNum = 1;
