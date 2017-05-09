@@ -1,25 +1,8 @@
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 public class GUI extends Application {
@@ -27,7 +10,7 @@ public class GUI extends Application {
 	private static final int sizeOfGame = 500;
 	private Generator generator;
 	private BlockType[][] level;
-	private Button buttonGenerate = new Button("Generate");
+	//private Button buttonGenerate = new Button("Generate");
 
 	public static void main(String[] args) {
 		launch(args);
@@ -71,16 +54,15 @@ public class GUI extends Application {
 					movedTo = generator.moveCharacter(3);
 					break;
 				case ENTER:
-					generator.generateLevel();
+					generator.generateLevel(5, 20, 100);
 					level = generator.getEnvironment();
-					movedTo = generator.moveCharacter(1);
+					changeToImage(level, pane);
 				default:
 					break;
 
 				}
 
 				if (movedTo != null) {
-					generator.printLevel();
 					changeToImage(level, pane);
 				}
 			}
@@ -106,8 +88,7 @@ public class GUI extends Application {
 	public void changeToImage(BlockType[][] level, Pane pane) {
 		for (int x = 0; x < level.length; x++) {
 			for (int y = 0; y < level[0].length; y++) {
-
-				Sprite block = new Sprite(level[x][y].ordinal(), x * (sizeOfGame / level.length),
+				Sprite block = new Sprite(level[x][level[0].length - y - 1].ordinal(), x * (sizeOfGame / level.length),
 						y * (sizeOfGame / level[0].length), sizeOfGame / level.length, sizeOfGame / level[0].length);
 				pane.getChildren().addAll(block);
 			}

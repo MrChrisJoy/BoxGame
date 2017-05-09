@@ -1,28 +1,26 @@
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-public class Generator {											//new vector2(0,1)						//new vector2(0, 1)
-	public static final Vector2[] directions = {new Vector2(-1, 0), new Vector2(0, -1), new Vector2(1, 0), new Vector2(0, 1)};
+public class Generator {
+	public static final Vector2[] directions = {new Vector2(-1, 0), new Vector2(0, 1), new Vector2(1, 0), new Vector2(0, -1)};
 	public static final Random random = new Random();
 	
 	private BlockType[][] level;
-	private State curr;
 	private List<State> next;
 	private int minX, maxX, minY, maxY;
 	private Vector2 playerPosition;
 	private Vector2[] goals;
 	
 	public static void main(String[] args) {
+		@SuppressWarnings("unused")
 		Generator b = new Generator();
-		b.generateLevel();
 	}
 	
 	public Generator() {
-		generateLevel();
+		generateLevel(5, 20, 100);
 	}
 	
 	public Vector2 moveCharacter(int dir) {
@@ -34,27 +32,28 @@ public class Generator {											//new vector2(0,1)						//new vector2(0, 1)
 				setLevelPosition(playerPosition, Arrays.asList(goals).contains(playerPosition) ? BlockType.goal : BlockType.floor);
 				return (playerPosition = newPos);
 			case box : 
-				for(State s : next) {
-					if(s.getPlayerLocation().equals(newPos) && s.getMovedBoxLocation().equals(Vector2.add(newPos, directions[dir])) && getLevelPosition(s.getMovedBoxLocation()) != BlockType.wall) {
-						curr = s;
-						next = s.getStates(false);
-						setLevelPosition(newPos, BlockType.player);
-						setLevelPosition(s.getMovedBoxLocation(), BlockType.box);
-						setLevelPosition(playerPosition, Arrays.asList(goals).contains(playerPosition) ? BlockType.goal : BlockType.floor);
-						return (playerPosition = newPos);
+				if(getLevelPosition(newPos).equals(BlockType.box)) {
+					for(State s : next) {
+						if(s.getPlayerLocation().equals(newPos) && s.getMovedBoxLocation().equals(Vector2.add(newPos, directions[dir])) && getLevelPosition(s.getMovedBoxLocation()) != BlockType.wall) {
+							next = s.getStates(false);
+							setLevelPosition(newPos, BlockType.player);
+							setLevelPosition(s.getMovedBoxLocation(), BlockType.box);
+							setLevelPosition(playerPosition, Arrays.asList(goals).contains(playerPosition) ? BlockType.goal : BlockType.floor);
+							return (playerPosition = newPos);
+						}
 					}
 				}
 			default: return null;
 		}
 	}
 	
-	public void generateLevel() {
+	public void generateLevel(int numBoxes, int numIterations, int difficulty) {
 		Set<Vector2> traversed = new HashSet<Vector2>();
-		goals = new Vector2[]{new Vector2(1, 1), new Vector2(-1, -1), new Vector2(-1,1), new Vector2(1, -1), new Vector2(2, 2), new Vector2(-2, -2), new Vector2(-2, 2), new Vector2(2, -2)};
-
+		goals = randomPositions(numBoxes);
+				
 		State s = new State(goals);
-		for(int i=0; i<50 && s != null; i++) {
-			State n = s.getRandomState(traversed, true);
+		for(int i=0; i<numIterations && s != null; i++) {
+			State n = s.getRandomState(traversed, true, difficulty);
 			if(n == null) break;
 			s = n;
 		}
@@ -83,8 +82,10 @@ public class Generator {											//new vector2(0,1)						//new vector2(0, 1)
 		maxX++;
 		maxY++;
 		
+		int paddedSize = Math.max(Math.abs(maxX - minX)+1, Math.abs(maxY - minY)+1);
+		
 		//Create 2D array with default false and add fence-post error
-		level = new BlockType[Math.abs(maxX - minX)+1][Math.abs(maxY - minY)+1];
+		level = new BlockType[paddedSize][paddedSize];
 		
 		for(Vector2 v : traversed) setLevelPosition(v, BlockType.floor);
 		for(Vector2 v : goals) setLevelPosition(v, BlockType.goal);
@@ -93,11 +94,13 @@ public class Generator {											//new vector2(0,1)						//new vector2(0, 1)
 		
 		for(int y=level[0].length-1; y>=0; y--) for(int x=0; x<level.length; x++) if(level[x][y] == null) level[x][y] = BlockType.wall;
 		
-		curr = s;
 		next = s.getStates(false);
 		playerPosition = s.getPlayerLocation();
-		
 		printLevel();
+	}
+	
+	public BlockType[][] getEnvironment() {
+		return level;
 	}
 	
 	private void setLevelPosition(Vector2 v, BlockType b) {
@@ -117,12 +120,23 @@ public class Generator {											//new vector2(0,1)						//new vector2(0, 1)
 		}
 	}
 	
-	/**
-	 * 
-	 * @author Jzhang 
-	 * @return returns the 2D array of the objects in the level
-	 */ 
-	public BlockType[][] getEnvironment() {
-		return level;
+	private Vector2[] randomPositions(int num) {
+		Vector2[] positions = new Vector2[num];
+		int[] xRandom = randomSequence(1, num );
+		int[] yRandom = randomSequence(1, num);
+		for(int i=0; i<positions.length; i++) positions[i] = new Vector2(xRandom[i], yRandom[i]);
+		return positions;
+	}
+	
+	static public int[] randomSequence(int start, int length) {
+		int[] array = new int[length];
+		for(int i=0; i<array.length; i++) array[i] = start + i;
+	    for (int i = array.length - 1; i > 0; i--) {
+	      int index = Generator.random.nextInt(i + 1);
+	      int a = array[index];
+	      array[index] = array[i];
+	      array[i] = a;
+	    }
+	    return array;
 	}
 }
