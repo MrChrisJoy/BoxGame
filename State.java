@@ -49,6 +49,10 @@ public class State {
 		return boxMoved;
 	}
 	
+	public int getMovedDirection() {
+		return dirMoved;
+	}
+	
 	public List<State> getStates(boolean reverse) {
 		List<State> states = new ArrayList<State>(boxLocations.length << 2);
 		CachedSearch search = new CachedSearch(getPlayerLocation(), Arrays.asList(boxLocations));
@@ -102,5 +106,16 @@ public class State {
 			return new State(this, newBoxLocations, playerAccess, box, dir);
 		}
 		return null;
+	}
+	
+	public boolean boxHasNextState(boolean reverse, Set<Vector2> floor, int box) {
+		CachedSearch search = new CachedSearch(getPlayerLocation(), Arrays.asList(boxLocations));
+		for(int dir=0; dir<Generator.directions.length; dir++) {
+			State s = reverse ? getPreviousBoxState(search, box, dir, null, 1) : getNextBoxState(search, box,  dir, null, 1);
+			if(s != null && floor.contains(Vector2.subtract(s.getPlayerLocation(),  Generator.directions[dir])) && floor.contains(s.getMovedBoxLocation())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
