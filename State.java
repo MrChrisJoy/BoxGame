@@ -15,6 +15,7 @@ public class State {
 		this.boxLocations = boxLocations;
 		this.playerStart = playerStart;
 		this.boxMoved = boxMoved;
+		this.dirMoved = dirMoved;
 	}
 	
 	public State(Vector2[] boxLocations, Vector2 playerStart) {
