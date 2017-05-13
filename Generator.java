@@ -6,7 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
 
-public class Generator {
+public class Generator implements IGenerator {
 	public static final Vector2[] directions = {new Vector2(-1, 0), new Vector2(0, 1), new Vector2(1, 0), new Vector2(0, -1)};
 	public static final Random random = new Random();
 	
@@ -81,10 +81,6 @@ public class Generator {
 	
 	public int getBoxMovedBox() {
 		return curr.getMovedBox();
-	}
-	
-	public Vector2 getBoxMovedLocation() {
-		return curr.getMovedBoxLocation();
 	}
 	
 	public Vector2[] getBoxLocations() {
