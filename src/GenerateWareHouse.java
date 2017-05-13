@@ -312,7 +312,8 @@ public class GenerateWareHouse {
 	}	
 	
 
-	public GenerateMaze movePlayer(KeyCode button) {
+	public boolean movePlayer(KeyCode button) {
+		boolean moveMade = false;
 		int x = 0;
 		int y = 0;
 		if(getPlayerLocation() != null) {
@@ -331,12 +332,14 @@ public class GenerateWareHouse {
 				System.out.println("Players Location "+x+","+y);
 				newMaze.getMaze()[x-1][y].setStatus(CellType.player);
 				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
 			// " ""B""P"	
 			}else if(newMaze.getMaze()[x-1][y].getStatus().equals(CellType.box) && (newMaze.getMaze()[x-2][y].getStatus().equals(CellType.floor)
 					|| newMaze.getMaze()[x-2][y].getStatus().equals(CellType.goal) ) ){
 				newMaze.getMaze()[x-2][y].setStatus(CellType.box);
 				newMaze.getMaze()[x-1][y].setStatus(CellType.player);
 				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
 			}			
 		}else if(button.equals(KeyCode.RIGHT)){
 			System.out.println("detect right");
@@ -345,12 +348,14 @@ public class GenerateWareHouse {
 				System.out.println("Players Location "+x+","+y);
 				newMaze.getMaze()[x+1][y].setStatus(CellType.player);
 				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
 			// "P""B"" "	
 			}else if(newMaze.getMaze()[x+1][y].getStatus().equals(CellType.box) && (newMaze.getMaze()[x+2][y].getStatus().equals(CellType.floor)
 					|| newMaze.getMaze()[x+2][y].getStatus().equals(CellType.goal)) ){
 				newMaze.getMaze()[x+2][y].setStatus(CellType.box);
 				newMaze.getMaze()[x+1][y].setStatus(CellType.player);
 				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
 			}			
 		}else if(button.equals(KeyCode.UP)){
 			System.out.println("detect up");
@@ -360,6 +365,7 @@ public class GenerateWareHouse {
 				System.out.println("Players Location "+x+","+y);
 				newMaze.getMaze()[x][y-1].setStatus(CellType.player);
 				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
 			// " "
 			// "B"
 			// "P"	
@@ -368,6 +374,7 @@ public class GenerateWareHouse {
 				newMaze.getMaze()[x][y-2].setStatus(CellType.box);
 				newMaze.getMaze()[x][y-1].setStatus(CellType.player);
 				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
 			}			
 		}else if(button.equals(KeyCode.DOWN)){
 			System.out.println("detect down");
@@ -377,6 +384,7 @@ public class GenerateWareHouse {
 				System.out.println("Players Location "+x+","+y);
 				newMaze.getMaze()[x][y+1].setStatus(CellType.player);
 				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
 			// "P"
 			// "B"
 			// " "	
@@ -385,6 +393,7 @@ public class GenerateWareHouse {
 				newMaze.getMaze()[x][y+2].setStatus(CellType.box);
 				newMaze.getMaze()[x][y+1].setStatus(CellType.player);
 				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
 			}			
 		}
 		
@@ -402,7 +411,7 @@ public class GenerateWareHouse {
 			}
 		}
 		
-		return newMaze;
+		return moveMade;
 	}
 
 	private CellOfMaze getPlayerLocation() {
