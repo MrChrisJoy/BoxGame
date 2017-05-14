@@ -7,12 +7,14 @@ import javafx.event.EventHandler;
 
 
 public class Generator implements IGenerator {
-	public static final Vector2[] directions = {new Vector2(-1, 0), new Vector2(0, 1), new Vector2(1, 0), new Vector2(0, -1)};
-	public static final Random random = new Random();
+	public static Random random = new Random();
 	
+	private State start;
 	private State goal;
 	private State curr;
 	private List<State> next;
+	
+	private int movedBox;
 	
 	private Vector2 playerPosition;
 	private Set<Vector2> floor;
@@ -25,14 +27,16 @@ public class Generator implements IGenerator {
 	
 	
 	public void moveCharacter(int dir) {
-		Vector2 newPos = Vector2.add(playerPosition, directions[dir]);
+		Vector2 newPos = Vector2.add(playerPosition, Vector2.directions[dir]);
 		for(int i=0; i<curr.getBoxLocations().length; i++) {
 			if(curr.getBoxLocation(i).equals(newPos)){
 				for(State s : next) {
-					if(s.getMovedBox() == i && s.getMovedBoxLocation().equals(Vector2.add(newPos, directions[dir])) && floor.contains(s.getMovedBoxLocation())) {
+					if(s.getMovedBox() == i && s.getMovedDirection() == dir && floor.contains(s.getMovedBoxLocation())) {
 						curr = s;
 						next = curr.getStates(false);
 						playerPosition = newPos;
+						movedBox = curr.getMovedBox();
+						
 						positionHandler.handle(null);
 						boxHandler.handle(null);
 						
@@ -55,11 +59,16 @@ public class Generator implements IGenerator {
 		}
 	}
 	
+	public void generateLevel(int numBoxes, int numIterations, int difficulty, long seed) {
+		random.setSeed(seed);
+		generateLevel(numBoxes, numIterations, difficulty);
+	}
+	
 	public void generateLevel(int numBoxes, int numIterations, int difficulty) {
 		floor = new HashSet<Vector2>();	
 		edge = new HashSet<Vector2>();	
 		goal = new State(randomPositions(numBoxes));
-		State start = goal;
+		start = goal;
 		for(int i=0; i<numIterations; i++) {
 			State temp = start.getRandomState(floor, true, difficulty);
 			if(temp == null) break;
@@ -67,20 +76,20 @@ public class Generator implements IGenerator {
 		}
 		
 		for(Vector2 v : floor) {
-			for(Vector2 dir : directions) {
+			for(Vector2 dir : Vector2.directions) {
 				Vector2 adjacent = Vector2.add(v, dir);
 				if(!floor.contains(adjacent)) edge.add(adjacent); 
 			}
 		}
 		
-		
 		curr = start;
 		next = start.getStates(false);
 		playerPosition = start.getPlayerLocation();
+		movedBox = curr.getMovedBox();
 	}
 	
 	public int getBoxMovedBox() {
-		return curr.getMovedBox();
+		return movedBox;
 	}
 	
 	public Vector2[] getBoxLocations() {
@@ -142,5 +151,18 @@ public class Generator implements IGenerator {
 	
 	public void setOnLose(EventHandler<ActionEvent> eventHandler) {
 		loseHandler = eventHandler;
+	}
+
+	public void undo() {
+		if(!curr.equals(start)) {
+			movedBox = curr.getMovedBox();
+			
+			curr = curr.getParent();
+			next = curr.getStates(false);
+			playerPosition = curr.getPlayerLocation();
+			
+			positionHandler.handle(null);
+			boxHandler.handle(null);
+		}
 	}
 }
