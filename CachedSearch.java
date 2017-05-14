@@ -129,9 +129,9 @@ public class CachedSearch {
 				return true;
 			}
 			
-			for(Vector2 childDir : Generator.directions) {
+			for(Vector2 childDir : Vector2.directions) {
 				Vector2 childPos = Vector2.add(parent.getPosition(), childDir);
-				if(childPos.x >= minX && childPos.x <= maxX && childPos.y >= minY && childPos.y <= maxY) {
+				if(childPos.x >= minX-1 && childPos.x <= maxX+1 && childPos.y >= minY-1 && childPos.y <= maxY+1) {
 					GridState child = new GridState(parent, childPos, (floor != null && floor.contains(childPos)) ? 1 :  newFloorCost);
 					if(!obsticals.contains(childPos)) {
 						int prevIndex = 0;

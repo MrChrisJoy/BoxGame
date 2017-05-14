@@ -59,7 +59,7 @@ public class State {
 		CachedSearch search = new CachedSearch(getPlayerLocation(), Arrays.asList(boxLocations));
 		
 		for(int box = 0; box < boxLocations.length; box++) {
-			for(int dir = 0; dir < Generator.directions.length; dir++) {
+			for(int dir = 0; dir < Vector2.directions.length; dir++) {
 				State found = (reverse ? getPreviousBoxState(search, box, dir, null, 1) : getNextBoxState(search, box, dir, null, 1));
 				if(found != null) states.add(found);
 			}
@@ -70,7 +70,7 @@ public class State {
 	public State getRandomState(Set<Vector2> floor, boolean reverse, int newFloorCost) {
 		CachedSearch search = new CachedSearch(getPlayerLocation(), Arrays.asList(boxLocations));
 		for(int box : Generator.randomSequence(0, boxLocations.length)) {
-			for(int dir : Generator.randomSequence(0, Generator.directions.length)) {
+			for(int dir : Generator.randomSequence(0, Vector2.directions.length)) {
 				State s = reverse ? getPreviousBoxState(search, box, dir, floor, newFloorCost) : getNextBoxState(search, box,  dir, floor, newFloorCost);
 				if(s != null) return s;
 			}
@@ -84,8 +84,8 @@ public class State {
 	}
 	
 	private State getNextBoxState(CachedSearch search, int box, int dir, Set<Vector2> floor, int newFloorCost) {
-		Vector2 newBoxLocation =  Vector2.add(boxLocations[box], Generator.directions[dir]);
-		Vector2 playerAccess = Vector2.subtract(boxLocations[box], Generator.directions[dir]);
+		Vector2 newBoxLocation =  Vector2.add(boxLocations[box], Vector2.directions[dir]);
+		Vector2 playerAccess = Vector2.subtract(boxLocations[box], Vector2.directions[dir]);
 		
 		if(!search.hasObstical(newBoxLocation) && search.addMinimumPath(playerAccess, floor, newFloorCost)) {
 			Vector2[] newBoxLocations = boxLocations.clone();
@@ -96,8 +96,8 @@ public class State {
 	}
 	
 	private State getPreviousBoxState(CachedSearch search, int box, int dir, Set<Vector2> floor, int newFloorCost) {
-		Vector2 newBoxLocation =  Vector2.add(boxLocations[box], Generator.directions[dir]);
-		Vector2 playerAccess = Vector2.add(boxLocations[box], Vector2.scale(Generator.directions[dir], 2));
+		Vector2 newBoxLocation =  Vector2.add(boxLocations[box], Vector2.directions[dir]);
+		Vector2 playerAccess = Vector2.add(boxLocations[box], Vector2.scale(Vector2.directions[dir], 2));
 		
 		if(!search.hasObstical(newBoxLocation) && search.addMinimumPath(playerAccess, floor, newFloorCost)) {
 			floor.add(boxLocations[box]);
@@ -111,12 +111,19 @@ public class State {
 	
 	public boolean boxHasNextState(boolean reverse, Set<Vector2> floor, int box) {
 		CachedSearch search = new CachedSearch(getPlayerLocation(), Arrays.asList(boxLocations));
-		for(int dir=0; dir<Generator.directions.length; dir++) {
+		for(int dir=0; dir<Vector2.directions.length; dir++) {
 			State s = reverse ? getPreviousBoxState(search, box, dir, null, 1) : getNextBoxState(search, box,  dir, null, 1);
-			if(s != null && floor.contains(Vector2.subtract(s.getPlayerLocation(),  Generator.directions[dir])) && floor.contains(s.getMovedBoxLocation())) {
+			if(s != null && floor.contains(Vector2.subtract(s.getPlayerLocation(),  Vector2.directions[dir])) && floor.contains(s.getMovedBoxLocation())) {
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o == null || !(o instanceof State)) return false;
+		State s = (State)o;
+		return boxLocations.equals(s.boxLocations) && playerStart.equals(s.playerStart) && boxMoved == s.boxMoved && dirMoved == s.dirMoved;
 	}
 }
