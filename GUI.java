@@ -195,14 +195,15 @@ public class GUI extends Application {
 	}
 	
 	private void setupKeyEvents(Scene scene) {
+		//UP/DOWN reversed since javafx coordinate system has -y axis
 		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent key) {
 				switch (key.getCode()) {
 				case LEFT: g.moveCharacter(Vector2.LEFT); break;
-				case UP: g.moveCharacter(Vector2.UP); break;
+				case UP: g.moveCharacter(Vector2.DOWN); break;
 				case RIGHT: g.moveCharacter(Vector2.RIGHT); break; 
-				case DOWN: g.moveCharacter(Vector2.DOWN) ;break;
+				case DOWN: g.moveCharacter(Vector2.UP) ;break;
 				case BACK_SPACE : g.undo(); break;
 				case ENTER: newLevel(); break;
 				default: break;
