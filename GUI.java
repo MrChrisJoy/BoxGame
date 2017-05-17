@@ -1,4 +1,7 @@
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -6,17 +9,20 @@ import javafx.scene.Camera;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
+import javafx.scene.SceneAntialiasing;
+import javafx.scene.SubScene;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
-import javafx.scene.shape.DrawMode;
 import javafx.stage.Stage;
 
 public class GUI extends Application {
-	private final int sceneScale = 100;
+	private final int sceneScale = 1;
 	private final Vector2 sceneDimensions = new Vector2(500, 500);
-	private final int cameraHeight = 10;
+	private final int cameraHeight = 15;
 	
 	private Box[] boxes;
 	private Box playerBox;
@@ -31,6 +37,10 @@ public class GUI extends Application {
 	private PerspectiveCamera camera;
 	private Group level;
 	
+	Timer timer;
+	private CachedLevels cachedLevels;
+	private  Record record;
+	
 	public static void main(String args[]){ 
 		launch(args); 
 	}
@@ -40,21 +50,41 @@ public class GUI extends Application {
 		//Create global generator
 		g = new Generator();
 		
-		//Create global materials
-		setupMaterials();
+		//Check for records every 30 seconds
+		cachedLevels = new CachedLevels("Player7765");
+		timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
+			  @Override
+			  public void run() {
+				Record r = cachedLevels.getRecord();
+			    if(r != null && !r.equals(record)) {
+			    	record = r;
+			    	System.out.println(record.opponent + " challenged you");
+			    }
+			  }
+			}, 30000, 30000);
 		
-		//Setup camera without fixed eye above level
-		camera = new PerspectiveCamera(false);
+		//Create camera with fixed eye
+		camera = new PerspectiveCamera(true);
 		camera.setTranslateZ(-sceneScale * cameraHeight);
-		
-		//Create and fill level group
+		 
+		//Create level group to be filled/cleared each generation and download materials
 		level = new Group(); 
+		setupMaterials();
 		newLevel();
+		 
+		//Group 3D nodes into a sub-scene with perspective camera
+		Group root3D = new Group(camera,level);
+		SubScene subScene = new SubScene(root3D, sceneDimensions.x, sceneDimensions.y, true, SceneAntialiasing.DISABLED);
+		subScene.setCamera(camera);
 		
-		//Create scene with depth buffer enabled
-		Scene scene = new Scene(level, sceneDimensions.x, sceneDimensions.y, true);
-		scene.setFill(Color.BLACK);
-		scene.setCamera(camera);
+		//Group sub-scene and 2D elements into stack pane
+		Label label = new Label("2d ui on 3d subscene");
+		StackPane pane = new StackPane();
+		pane.getChildren().addAll(subScene, label);
+		
+		//Create main scene
+		Scene scene = new Scene(pane);
 		
 		//Set up input events
 		setupKeyEvents(scene);
@@ -87,20 +117,25 @@ public class GUI extends Application {
 			}
 		});
 		
-		//Display stage
+		//Display scene
 		stage.setScene(scene); 
-		stage.show(); 
+		stage.show();
+	}
+	
+	@Override
+	public void stop() {
+		timer.cancel();
 	}
 	
 	private void centreCamera(Vector2 pos) {
-		//Camera center is top left corner so offset by half screen dimensions
-		camera.setTranslateX(sceneScale * pos.x - sceneDimensions.x/2.0 * camera.getScaleX());
-		camera.setTranslateY(sceneScale * pos.y - sceneDimensions.y/2.0 * camera.getScaleY());
+		//Camera center is top left corner so offset by half screen dimensions		
+		camera.setTranslateX(sceneScale * pos.x);
+		camera.setTranslateY(sceneScale * pos.y);
 	}
 	
 	private void newLevel() {
 		//Generate a new level
-		g.generateLevel(5, 25, 100);
+		g.generateLevel(5, 20, 100);
 		
 		//Clear previous level group
 		level.getChildren().clear();
@@ -119,7 +154,6 @@ public class GUI extends Application {
 		//Position camera
 		centreCamera(g.getPlayerLocation());
 	}
-	
 	
 	private void createPlayer(Vector2 start) {
 		playerBox = new Box(sceneScale, sceneScale, sceneScale); 
@@ -167,7 +201,6 @@ public class GUI extends Application {
 			b.setTranslateX(sceneScale * v.x);
 			b.setTranslateY(sceneScale * v.y);
 			b.setMaterial(edge);
-			b.setDrawMode(DrawMode.FILL);
 			root.getChildren().add(b);
 		}
 	}
@@ -195,15 +228,14 @@ public class GUI extends Application {
 	}
 	
 	private void setupKeyEvents(Scene scene) {
-		//UP/DOWN reversed since javafx coordinate system has -y axis
 		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent key) {
 				switch (key.getCode()) {
 				case LEFT: g.moveCharacter(Vector2.LEFT); break;
-				case UP: g.moveCharacter(Vector2.DOWN); break;
+				case UP: g.moveCharacter(Vector2.UP); break;
 				case RIGHT: g.moveCharacter(Vector2.RIGHT); break; 
-				case DOWN: g.moveCharacter(Vector2.UP) ;break;
+				case DOWN: g.moveCharacter(Vector2.DOWN) ;break;
 				case BACK_SPACE : g.undo(); break;
 				case ENTER: newLevel(); break;
 				default: break;

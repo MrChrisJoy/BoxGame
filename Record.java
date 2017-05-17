@@ -13,4 +13,11 @@ public class Record {
 	public String toString() {
 		return seed + " " + opponent + " " + time;
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o == null || !(o instanceof Record)) return false;
+		Record r = (Record)o;
+		return r.seed == seed && r.opponent.equals(opponent) && r.time == time;
+	}
 }
