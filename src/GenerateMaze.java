@@ -29,7 +29,7 @@ public class GenerateMaze {
 		}
 		
 		Random RG = new Random();
-		//position of the block located (x*2-1,y*2-1), randomly generated
+	
 		CellOfMaze startMazeBlock = maze[RG.nextInt(s)*2+1][RG.nextInt(s)*2+1];
 		//add visited block into list
 		blocksList.add(startMazeBlock);
