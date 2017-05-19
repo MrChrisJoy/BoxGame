@@ -15,20 +15,22 @@ public class GenerateWareHouse {
 	private ArrayList<CellOfMaze> pathCells;
 	ArrayList<CellOfMaze> startCells;
 	ArrayList<CellOfMaze> finishCells;
+	ArrayList<CellOfMaze> goalCells;
 	private int numBox;
-	private int difficulty;
 	Random RG;
+	ArrayList<CellOfMaze> undoMoves; //for undo implementation
 	
-	public GenerateWareHouse(int diff,int numBox) {
+	public GenerateWareHouse(int size,int numBox) {
 		newMaze = new GenerateMaze();
-		newMaze.createMaze(diff);
+		newMaze.createMaze(size);
 		this.numBox = numBox;
-		this.difficulty = diff;
 		astar = new AStar(newMaze.getMaze(),newMaze.getMazeSize());
 		pathCells = new ArrayList<CellOfMaze>();
 		startCells = new ArrayList<CellOfMaze>();
 		finishCells = new ArrayList<CellOfMaze>();
 		RG = new Random();
+		undoMoves = new ArrayList<CellOfMaze>(); 
+		goalCells = new ArrayList<CellOfMaze>(); 
 	}
 	
 	/**
@@ -51,6 +53,9 @@ public class GenerateWareHouse {
 				CellOfMaze mazeblock = new CellOfMaze(c,r); // if dont create new cell; then it will still point to the old maze's locations
 				maze[c][r] = mazeblock;						// then it will cause disaster
 				maze[c][r].setStatus(newMaze.getMaze()[c-1][r-1].getStatus()); 
+				if(maze[c][r].getStatus().equals(CellType.goal)){ // Getting all goal states
+					goalCells.add(maze[c][r]);
+				}
 			}
 		}
 				
@@ -77,13 +82,18 @@ public class GenerateWareHouse {
 			cell.setStatus(CellType.test);
 		}
 
+		// accounts for all possible box's path like  " B P" in the addPathsWareHouse() 
+		for(CellOfMaze cell: pathCells) {
+			if(cell.getStatus().equals(CellType.player)){
+				pX = cell.getX();
+				pY = cell.getY();
+				cell.setStatus(CellType.test);
+			}
+		}
+		
 		for(CellOfMaze cell: pathCells) {
 			x = cell.getX();
 			y = cell.getY();
-			if(cell.getStatus().equals(CellType.player)) {
-				pX = cell.getX();
-				pY = cell.getY();
-			}
 			//  * *
 			//  *
 			if(newMaze.getMaze()[x][y+1].getStatus().equals(CellType.test) && newMaze.getMaze()[x+1][y].getStatus().equals(CellType.test)) {
@@ -132,9 +142,9 @@ public class GenerateWareHouse {
 			x = cell.getX();
 			y = cell.getY();
 			
-			// B
-			// *
-			if(newMaze.getMaze()[x][y+1].getStatus().equals(CellType.test)){
+			// B B
+			// * B
+			if(newMaze.getMaze()[x][y+1].getStatus().equals(CellType.test) || newMaze.getMaze()[x][y+1].getStatus().equals(CellType.box)){
 				wallsToRemove.add(newMaze.getMaze()[x][y-1]);
 				wallsToRemove.add(newMaze.getMaze()[x-1][y-1]);
 				wallsToRemove.add(newMaze.getMaze()[x-1][y]);
@@ -145,7 +155,7 @@ public class GenerateWareHouse {
 			}
 			// *
 			// B
-			if(newMaze.getMaze()[x][y-1].getStatus().equals(CellType.test)){
+			if(newMaze.getMaze()[x][y-1].getStatus().equals(CellType.test) || newMaze.getMaze()[x][y-1].getStatus().equals(CellType.box)){
 				wallsToRemove.add(newMaze.getMaze()[x][y+1]);
 				wallsToRemove.add(newMaze.getMaze()[x-1][y+1]);
 				wallsToRemove.add(newMaze.getMaze()[x-1][y]);
@@ -156,7 +166,7 @@ public class GenerateWareHouse {
 			}
 			
 			// B *
-			if(newMaze.getMaze()[x+1][y].getStatus().equals(CellType.test)){
+			if(newMaze.getMaze()[x+1][y].getStatus().equals(CellType.test) || newMaze.getMaze()[x+1][y].getStatus().equals(CellType.box)){
 				wallsToRemove.add(newMaze.getMaze()[x-1][y]);
 				wallsToRemove.add(newMaze.getMaze()[x-1][y-1]);
 				wallsToRemove.add(newMaze.getMaze()[x][y-1]);
@@ -167,7 +177,7 @@ public class GenerateWareHouse {
 			}
 			
 			// * B
-			if(newMaze.getMaze()[x-1][y].getStatus().equals(CellType.test)){
+			if(newMaze.getMaze()[x-1][y].getStatus().equals(CellType.test) || newMaze.getMaze()[x-1][y].getStatus().equals(CellType.box)){
 				wallsToRemove.add(newMaze.getMaze()[x+1][y]);
 				wallsToRemove.add(newMaze.getMaze()[x+1][y-1]);
 				wallsToRemove.add(newMaze.getMaze()[x][y-1]);
@@ -176,10 +186,8 @@ public class GenerateWareHouse {
 				wallsToRemove.add(newMaze.getMaze()[x][y+1]);
 				wallsToRemove.add(newMaze.getMaze()[x-1][y+1]);
 			}
-			
-			
-			
 		}
+		
 		for(CellOfMaze cell: wallsToRemove){
 			cell.setStatus(CellType.floor);
 		}
@@ -193,16 +201,19 @@ public class GenerateWareHouse {
 			newMaze.getMaze()[cell.getX()][cell.getY()].setStatus(CellType.box);
 		}
 		newMaze.getMaze()[pX][pY].setStatus(CellType.player);
-		System.out.println("Players Location: "+ pX + "," + pY);
+		
+		System.out.println("After creating path to move....");
+		newMaze.printMaze();
+	//	System.out.println("Players Location: "+ pX + "," + pY);
 		return newMaze.getMaze();
 	}
-	
-	
 	
 	public CellOfMaze[][] generateBoxPath() {
 		boolean pathCell = false;
 		CellOfMaze finish;
 		CellOfMaze start;
+	//	finishCells.addAll(getOrderedFloorCell());
+	//	System.out.println("[finishCells] " + finishCells.size());
 		for(int i=0; i < numBox; i++) {
 			finish = getRandomFloorCell(newMaze);
 			start = getRandomFloorCell(newMaze);
@@ -220,6 +231,8 @@ public class GenerateWareHouse {
 			
 			startCells.add(start);
 			finishCells.add(finish);
+	//		finish = finishCells.get(i);
+	//		System.out.println("G loc "  + finish.getX() + "," + finish.getY());
 			pathCells.addAll(getPath(start,finish));
 			pathCells.addAll(getPath(finish,getStartCellMaze(newMaze)));
 		}	
@@ -235,7 +248,7 @@ public class GenerateWareHouse {
 			if(newMaze.getMaze()[cell.getX()][cell.getY()].getStatus().equals(CellType.player)) {
 				newMaze.getMaze()[cell.getX()][cell.getY()].setStatus(CellType.player);
 				pathCell = true;
-				System.out.println("generateBoxPath player Loc " + cell.getX() + "," + cell.getY() );
+				//System.out.println("generateBoxPath player Loc " + cell.getX() + "," + cell.getY() );
 			}else if (newMaze.getMaze()[cell.getX()][cell.getY()].getStatus().equals(CellType.box)) {
 				newMaze.getMaze()[cell.getX()][cell.getY()].setStatus(CellType.box);
 			}else if(newMaze.getMaze()[cell.getX()][cell.getY()].getStatus().equals(CellType.goal)) {
@@ -247,9 +260,235 @@ public class GenerateWareHouse {
 		if(!pathCell){
 			pathCells.add(getStartCellMaze(newMaze)); // Why does the original path doesnt have it; how does it get replaced
 		}
+		// PRINTINGGGG
+		newMaze.printMaze();
+		System.out.println("Num of pathCells: " + pathCells.size());
 		return newMaze.getMaze();
+		
 	}
 	
+	public boolean movePlayer(KeyCode button) {
+		boolean moveMade = false;
+		int x = 0;
+		int y = 0;
+		if(getPlayerLocation() != null) {
+			x = getPlayerLocation().getX();
+			y = getPlayerLocation().getY();
+		}else {
+			System.out.println("player Location is null");
+			newMaze.printMaze();
+		}
+		
+		if(button.equals(KeyCode.LEFT)){
+			System.out.println("detect left");
+			// " ""P"
+			if(newMaze.getMaze()[x-1][y].getStatus().equals(CellType.floor) || newMaze.getMaze()[x-1][y].getStatus().equals(CellType.goal)){
+				System.out.println("Players Location "+x+","+y);
+				undoMoves.clear();
+				CellOfMaze cell1 = new CellOfMaze(x-1,y);
+				cell1.setStatus(newMaze.getMaze()[x-1][y].getStatus());
+				CellOfMaze cell2 = new CellOfMaze(x,y);
+				cell2.setStatus(newMaze.getMaze()[x][y].getStatus());
+				undoMoves.add(cell1);
+				undoMoves.add(cell2);
+				
+				newMaze.getMaze()[x-1][y].setStatus(CellType.player);
+				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
+				
+				
+				
+			// " ""B""P"	
+			}else if(newMaze.getMaze()[x-1][y].getStatus().equals(CellType.box) && (newMaze.getMaze()[x-2][y].getStatus().equals(CellType.floor)
+					|| newMaze.getMaze()[x-2][y].getStatus().equals(CellType.goal) ) ){
+				
+				undoMoves.clear();
+				
+				CellOfMaze cell1 = new CellOfMaze(x-1,y);
+				cell1.setStatus(newMaze.getMaze()[x-1][y].getStatus());
+				CellOfMaze cell2 = new CellOfMaze(x-2,y);
+				cell2.setStatus(newMaze.getMaze()[x-2][y].getStatus());
+				CellOfMaze cell3 = new CellOfMaze(x,y);
+				cell3.setStatus(newMaze.getMaze()[x][y].getStatus());
+				undoMoves.add(cell1);
+				undoMoves.add(cell2);
+				undoMoves.add(cell3);
+				
+				newMaze.getMaze()[x-2][y].setStatus(CellType.box);
+				newMaze.getMaze()[x-1][y].setStatus(CellType.player);
+				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				
+				moveMade = true;
+			}			
+		}else if(button.equals(KeyCode.RIGHT)){
+			System.out.println("detect right");
+			// "P"" "
+			if(newMaze.getMaze()[x+1][y].getStatus().equals(CellType.floor) || newMaze.getMaze()[x+1][y].getStatus().equals(CellType.goal)){
+				System.out.println("Players Location "+x+","+y);
+				
+				undoMoves.clear();
+				
+				CellOfMaze cell1 = new CellOfMaze(x+1,y);
+				cell1.setStatus(newMaze.getMaze()[x+1][y].getStatus());
+				CellOfMaze cell2 = new CellOfMaze(x,y);
+				cell2.setStatus(newMaze.getMaze()[x][y].getStatus());
+				undoMoves.add(cell1);
+				undoMoves.add(cell2);
+				
+				newMaze.getMaze()[x+1][y].setStatus(CellType.player);
+				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
+			// "P""B"" "	
+			}else if(newMaze.getMaze()[x+1][y].getStatus().equals(CellType.box) && (newMaze.getMaze()[x+2][y].getStatus().equals(CellType.floor)
+					|| newMaze.getMaze()[x+2][y].getStatus().equals(CellType.goal)) ){
+				
+				undoMoves.clear();
+				
+				CellOfMaze cell1 = new CellOfMaze(x+1,y);
+				cell1.setStatus(newMaze.getMaze()[x+1][y].getStatus());
+				CellOfMaze cell2 = new CellOfMaze(x+2,y);
+				cell2.setStatus(newMaze.getMaze()[x+2][y].getStatus());
+				CellOfMaze cell3 = new CellOfMaze(x,y);
+				cell3.setStatus(newMaze.getMaze()[x][y].getStatus());
+				undoMoves.add(cell1);
+				undoMoves.add(cell2);
+				undoMoves.add(cell3);
+				
+				newMaze.getMaze()[x+2][y].setStatus(CellType.box);
+				newMaze.getMaze()[x+1][y].setStatus(CellType.player);
+				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
+			}			
+		}else if(button.equals(KeyCode.UP)){
+			System.out.println("detect up");
+			// " "
+			// "P"
+			if(newMaze.getMaze()[x][y-1].getStatus().equals(CellType.floor) || newMaze.getMaze()[x][y-1].getStatus().equals(CellType.goal)){
+				System.out.println("Players Location "+x+","+y);
+				
+				undoMoves.clear();
+				
+				CellOfMaze cell1 = new CellOfMaze(x,y-1);
+				cell1.setStatus(newMaze.getMaze()[x][y-1].getStatus());
+				CellOfMaze cell2 = new CellOfMaze(x,y);
+				cell2.setStatus(newMaze.getMaze()[x][y].getStatus());
+				undoMoves.add(cell1);
+				undoMoves.add(cell2);
+				
+				newMaze.getMaze()[x][y-1].setStatus(CellType.player);
+				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
+			// " "
+			// "B"
+			// "P"	
+			}else if(newMaze.getMaze()[x][y-1].getStatus().equals(CellType.box) && (newMaze.getMaze()[x][y-2].getStatus().equals(CellType.floor) 
+					|| newMaze.getMaze()[x][y-2].getStatus().equals(CellType.goal))){
+				
+				undoMoves.clear();
+				
+				CellOfMaze cell1 = new CellOfMaze(x,y-1);
+				cell1.setStatus(newMaze.getMaze()[x][y-1].getStatus());
+				CellOfMaze cell2 = new CellOfMaze(x,y-2);
+				cell2.setStatus(newMaze.getMaze()[x][y-2].getStatus());
+				CellOfMaze cell3 = new CellOfMaze(x,y);
+				cell3.setStatus(newMaze.getMaze()[x][y].getStatus());
+				undoMoves.add(cell1);
+				undoMoves.add(cell2);
+				undoMoves.add(cell3);
+				
+				newMaze.getMaze()[x][y-2].setStatus(CellType.box);
+				newMaze.getMaze()[x][y-1].setStatus(CellType.player);
+				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
+			}			
+		}else if(button.equals(KeyCode.DOWN)){
+			System.out.println("detect down");
+			// "P"
+			// " "
+			if(newMaze.getMaze()[x][y+1].getStatus().equals(CellType.floor)|| newMaze.getMaze()[x][y+1].getStatus().equals(CellType.goal)){
+				System.out.println("Players Location "+x+","+y);
+				
+				undoMoves.clear();
+				
+				CellOfMaze cell1 = new CellOfMaze(x,y+1);
+				cell1.setStatus(newMaze.getMaze()[x][y+1].getStatus());
+				CellOfMaze cell2 = new CellOfMaze(x,y);
+				cell2.setStatus(newMaze.getMaze()[x][y].getStatus());
+				undoMoves.add(cell1);
+				undoMoves.add(cell2);
+				
+				newMaze.getMaze()[x][y+1].setStatus(CellType.player);
+				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
+			// "P"
+			// "B"
+			// " "	
+			}else if(newMaze.getMaze()[x][y+1].getStatus().equals(CellType.box) && (newMaze.getMaze()[x][y+2].getStatus().equals(CellType.floor) 
+					|| newMaze.getMaze()[x][y+2].getStatus().equals(CellType.goal)) ){
+				
+				undoMoves.clear();
+				
+				CellOfMaze cell1 = new CellOfMaze(x,y+1);
+				cell1.setStatus(newMaze.getMaze()[x][y+1].getStatus());
+				CellOfMaze cell2 = new CellOfMaze(x,y+2);
+				cell2.setStatus(newMaze.getMaze()[x][y+2].getStatus());
+				CellOfMaze cell3 = new CellOfMaze(x,y);
+				cell3.setStatus(newMaze.getMaze()[x][y].getStatus());
+				undoMoves.add(cell1);
+				undoMoves.add(cell2);
+				undoMoves.add(cell3);
+				
+				newMaze.getMaze()[x][y+2].setStatus(CellType.box);
+				newMaze.getMaze()[x][y+1].setStatus(CellType.player);
+				newMaze.getMaze()[x][y].setStatus(CellType.floor);
+				moveMade = true;
+			}			
+		}else if(button.equals(KeyCode.U)){
+			System.out.println("Undo.. MOves: " + undoMoves.size());
+			for(CellOfMaze cell: undoMoves){
+				newMaze.getMaze()[cell.getX()][cell.getY()].setStatus(cell.getStatus());
+			}
+			moveMade = true;
+		}
+				
+		// resettin goal location to be goal after a player moved over it
+		for(CellOfMaze cell: finishCells){
+			x = cell.getX() + 1; // adjusted according to new map
+			y = cell.getY() + 1;
+			if(!newMaze.getMaze()[x][y].getStatus().equals(CellType.goal)){
+				if(newMaze.getMaze()[x][y].getStatus().equals(CellType.box)){
+					continue;
+				}else if(newMaze.getMaze()[x][y].getStatus().equals(CellType.player)){
+					continue;
+				}else {
+					newMaze.getMaze()[x][y].setStatus(CellType.goal);
+				}
+			}
+		}
+	/*	
+		if(isWin()){
+			System.out.println("Won");
+		}
+	*/	
+		return moveMade;
+	}
+
+	
+	public boolean isWin() {
+		boolean win = false;
+		int numOfWin = 0;
+		for(CellOfMaze finish: goalCells){
+			if(newMaze.getMaze()[finish.getX()][finish.getY()].getStatus().equals(CellType.box)){
+				System.out.println("REached ");
+				numOfWin++;
+			}
+			System.out.println("Goal Loc: " + finish.getX() + "," + finish.getY() + " " + finish.getStatus());
+		}
+		if(numOfWin == goalCells.size()){
+			win = true;
+		}
+		return win;
+	}
 	
 	public ArrayList<CellOfMaze> getFloorCells(GenerateMaze maze) {
 		ArrayList<CellOfMaze> floorCells = new ArrayList<CellOfMaze>();	
@@ -283,7 +522,29 @@ public class GenerateWareHouse {
 		return null;
 	}
 	
+	public ArrayList<CellOfMaze> getOrderedFloorCell(){
+		ArrayList<CellOfMaze> floorCells = getFloorCells(newMaze);
+		ArrayList<CellOfMaze> orderedFloor = new ArrayList<CellOfMaze>();
+
+		for(int i=0; i < numBox; i++){			
+			orderedFloor.add(floorCells.get(floorCells.size()-1-i));
+		}
+		System.out.println("size of finish locs: " + floorCells.size());
+		return orderedFloor;
+	}
 	
+	
+	private CellOfMaze getPlayerLocation() {
+		for (int r = 0; r < newMaze.getMazeSize(); r++){
+			for(int c = 0; c < newMaze.getMazeSize(); c++){
+				if(newMaze.getMaze()[c][r].getStatus().equals(CellType.player)){
+					return newMaze.getMaze()[c][r];
+				}		
+			}
+		}
+		return null;
+	}
+
 	public boolean checkAdjacent(CellOfMaze cell, CellType type){
 		int x = cell.getX();
 		int y = cell.getY();
@@ -301,8 +562,6 @@ public class GenerateWareHouse {
 		}
 		return false;	
 	}
-	
-	
 	public ArrayList<CellOfMaze> getPath(CellOfMaze start, CellOfMaze finish) {
 		return astar.findPath(start, finish);
 	}
@@ -311,118 +570,5 @@ public class GenerateWareHouse {
 		return newMaze;
 	}	
 	
-
-	public boolean movePlayer(KeyCode button) {
-		boolean moveMade = false;
-		int x = 0;
-		int y = 0;
-		if(getPlayerLocation() != null) {
-			x = getPlayerLocation().getX();
-			y = getPlayerLocation().getY();
-		}else {
-			System.out.println("player Location is null");
-			newMaze.printMaze();
-		}
-		
-		
-		if(button.equals(KeyCode.LEFT)){
-			System.out.println("detect left");
-			// " ""P"
-			if(newMaze.getMaze()[x-1][y].getStatus().equals(CellType.floor) || newMaze.getMaze()[x-1][y].getStatus().equals(CellType.goal)){
-				System.out.println("Players Location "+x+","+y);
-				newMaze.getMaze()[x-1][y].setStatus(CellType.player);
-				newMaze.getMaze()[x][y].setStatus(CellType.floor);
-				moveMade = true;
-			// " ""B""P"	
-			}else if(newMaze.getMaze()[x-1][y].getStatus().equals(CellType.box) && (newMaze.getMaze()[x-2][y].getStatus().equals(CellType.floor)
-					|| newMaze.getMaze()[x-2][y].getStatus().equals(CellType.goal) ) ){
-				newMaze.getMaze()[x-2][y].setStatus(CellType.box);
-				newMaze.getMaze()[x-1][y].setStatus(CellType.player);
-				newMaze.getMaze()[x][y].setStatus(CellType.floor);
-				moveMade = true;
-			}			
-		}else if(button.equals(KeyCode.RIGHT)){
-			System.out.println("detect right");
-			// "P"" "
-			if(newMaze.getMaze()[x+1][y].getStatus().equals(CellType.floor) || newMaze.getMaze()[x+1][y].getStatus().equals(CellType.goal)){
-				System.out.println("Players Location "+x+","+y);
-				newMaze.getMaze()[x+1][y].setStatus(CellType.player);
-				newMaze.getMaze()[x][y].setStatus(CellType.floor);
-				moveMade = true;
-			// "P""B"" "	
-			}else if(newMaze.getMaze()[x+1][y].getStatus().equals(CellType.box) && (newMaze.getMaze()[x+2][y].getStatus().equals(CellType.floor)
-					|| newMaze.getMaze()[x+2][y].getStatus().equals(CellType.goal)) ){
-				newMaze.getMaze()[x+2][y].setStatus(CellType.box);
-				newMaze.getMaze()[x+1][y].setStatus(CellType.player);
-				newMaze.getMaze()[x][y].setStatus(CellType.floor);
-				moveMade = true;
-			}			
-		}else if(button.equals(KeyCode.UP)){
-			System.out.println("detect up");
-			// " "
-			// "P"
-			if(newMaze.getMaze()[x][y-1].getStatus().equals(CellType.floor) || newMaze.getMaze()[x][y-1].getStatus().equals(CellType.goal)){
-				System.out.println("Players Location "+x+","+y);
-				newMaze.getMaze()[x][y-1].setStatus(CellType.player);
-				newMaze.getMaze()[x][y].setStatus(CellType.floor);
-				moveMade = true;
-			// " "
-			// "B"
-			// "P"	
-			}else if(newMaze.getMaze()[x][y-1].getStatus().equals(CellType.box) && (newMaze.getMaze()[x][y-2].getStatus().equals(CellType.floor) 
-					|| newMaze.getMaze()[x][y-2].getStatus().equals(CellType.goal))){
-				newMaze.getMaze()[x][y-2].setStatus(CellType.box);
-				newMaze.getMaze()[x][y-1].setStatus(CellType.player);
-				newMaze.getMaze()[x][y].setStatus(CellType.floor);
-				moveMade = true;
-			}			
-		}else if(button.equals(KeyCode.DOWN)){
-			System.out.println("detect down");
-			// "P"
-			// " "
-			if(newMaze.getMaze()[x][y+1].getStatus().equals(CellType.floor)|| newMaze.getMaze()[x][y+1].getStatus().equals(CellType.goal)){
-				System.out.println("Players Location "+x+","+y);
-				newMaze.getMaze()[x][y+1].setStatus(CellType.player);
-				newMaze.getMaze()[x][y].setStatus(CellType.floor);
-				moveMade = true;
-			// "P"
-			// "B"
-			// " "	
-			}else if(newMaze.getMaze()[x][y+1].getStatus().equals(CellType.box) && (newMaze.getMaze()[x][y+2].getStatus().equals(CellType.floor) 
-					|| newMaze.getMaze()[x][y+2].getStatus().equals(CellType.goal)) ){
-				newMaze.getMaze()[x][y+2].setStatus(CellType.box);
-				newMaze.getMaze()[x][y+1].setStatus(CellType.player);
-				newMaze.getMaze()[x][y].setStatus(CellType.floor);
-				moveMade = true;
-			}			
-		}
-		
-		for(CellOfMaze cell: finishCells){
-			x = cell.getX() + 1; // adjusted according to new map
-			y = cell.getY() + 1;
-			if(!newMaze.getMaze()[x][y].getStatus().equals(CellType.goal)){
-				if(newMaze.getMaze()[x][y].getStatus().equals(CellType.box)){
-					continue;
-				}else if(newMaze.getMaze()[x][y].getStatus().equals(CellType.player)){
-					continue;
-				}else {
-					newMaze.getMaze()[x][y].setStatus(CellType.goal);
-				}
-			}
-		}
-		
-		return moveMade;
-	}
-
-	private CellOfMaze getPlayerLocation() {
-		for (int r = 0; r < newMaze.getMazeSize(); r++){
-			for(int c = 0; c < newMaze.getMazeSize(); c++){
-				if(newMaze.getMaze()[c][r].getStatus().equals(CellType.player)){
-					return newMaze.getMaze()[c][r];
-				}		
-			}
-		}
-		return null;
-	}
 
 }

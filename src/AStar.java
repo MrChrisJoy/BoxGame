@@ -85,6 +85,7 @@ public class AStar {
 				maze[c][r].setUnVisited();;					
 			}
 		}
+		//System.out.println("Num of Path Cells: " + path.size());
 		return path;
 	}
 
@@ -127,11 +128,12 @@ public class AStar {
 		return Math.abs(start.getX() - finish.getX()) + Math.abs(start.getY() - finish.getY());
 	}
 
-	private ArrayList<CellOfMaze> getPossibleAdjCells(CellOfMaze cell) {
+	public ArrayList<CellOfMaze> getPossibleAdjCells(CellOfMaze cell) {
 		// x<- col  y<- row
 		ArrayList<CellOfMaze> possibleCells = new ArrayList<CellOfMaze>();
 		int x = cell.getX();
 		int y = cell.getY();
+		/*
 		if(y == mazeSize-1) {
 			if(maze[x+1][y].getStatus().equals(CellType.floor) || maze[x+1][y].getStatus().equals(CellType.player)){
 				if(!maze[x+1][y].hasVisited()){
@@ -149,10 +151,12 @@ public class AStar {
 				}
 			}
 		}else {
-		
-			if(maze[x][y+1].getStatus().equals(CellType.floor)  || maze[x][y+1].getStatus().equals(CellType.player)){
-				if(!maze[x][y+1].hasVisited()){
-					possibleCells.add(maze[x][y+1]);
+		 	*/	
+			if(y != mazeSize -1) {
+				if(maze[x][y+1].getStatus().equals(CellType.floor)  || maze[x][y+1].getStatus().equals(CellType.player)){
+					if(!maze[x][y+1].hasVisited()){
+						possibleCells.add(maze[x][y+1]);
+					}
 				}
 			}
 			if(maze[x][y-1].getStatus().equals(CellType.floor)  || maze[x][y-1].getStatus().equals(CellType.player)){
@@ -170,7 +174,7 @@ public class AStar {
 					possibleCells.add(maze[x-1][y]);
 				}
 			}				
-		}
+		//}
 		return possibleCells;
 	}	
 }
