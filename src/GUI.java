@@ -20,7 +20,7 @@ public class GUI extends Application{
 	 	wareHouse.buildWearHouse();
 		Pane pane = new Pane();
 		Scene scene = new Scene(pane, sizeOfGame, sizeOfGame); // randomly assigned size
-		
+
 		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent key) {
@@ -41,7 +41,7 @@ public class GUI extends Application{
 				default:
 					break;
 				}
-				
+
 				if(validMove){
 					wareHouse.getMaze().printMaze();
 					changeToImage(wareHouse.getMaze().getMaze(), pane);	
@@ -49,8 +49,8 @@ public class GUI extends Application{
 			}
 
 		});
-		
-		changeToImage(wareHouse.getMaze().getMaze(), pane);	
+
+		changeToImage(wareHouse.getMaze().getMaze(), pane);
 		stage.setScene(scene);
 		stage.show();
 	}
