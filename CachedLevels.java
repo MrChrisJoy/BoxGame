@@ -32,7 +32,7 @@ public class CachedLevels {
 			Scanner s = new Scanner(new InputStreamReader(lu.getInputStream()));
 			if(s.hasNext()) c = new Record(s.nextLong(), s.next(), s.nextLong());
 			else System.out.println("none found");
-			wr.close();
+			
 			s.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -46,14 +46,21 @@ public class CachedLevels {
 			connect();
 			wr.write(URLEncoder.encode("?player=" + player + "&seed=" + r.seed + "&time=" + time, "UTF-8"));
 			wr.flush();
-			
 			Scanner s = new Scanner(new InputStreamReader(lu.getInputStream()));
 			if(s.hasNextInt() && s.nextInt() == 1) recordHolder = true;
-			wr.close();
 			s.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return recordHolder;
+	}
+	
+	public void close() {
+		try {
+			wr.flush();
+			wr.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

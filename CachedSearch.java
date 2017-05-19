@@ -67,6 +67,7 @@ public class CachedSearch {
 	 * @param obsticals constant locations search must avoid
 	 */
 	public CachedSearch(Vector2 start, Collection<Vector2> obsticals) {
+		//also keep search in bounding region
 		this.start = start;
 		this.obsticals = obsticals;
 		
@@ -102,6 +103,18 @@ public class CachedSearch {
 	private boolean search(Vector2 end, Collection<Vector2> floor, int newFloorCost) {
 		if(obsticals.contains(end)) return false;
 		
+		int minX = Math.min(start.x, end.x);
+		int maxX = Math.max(start.x, end.x);
+		int minY = Math.min(start.y, end.y);
+		int maxY = Math.max(start.y, end.y);
+		
+		for(Vector2 v : floor != null ? floor : obsticals) {
+			if(v.x < minX) minX = v.x;
+			if(v.x > maxX) maxX = v.x;
+			if(v.y < minY) minY = v.y;
+			if(v.y > maxY) maxY = v.y;
+		}
+
 		Queue<GridState> pathQueue = new PriorityQueue<GridState>((a, b)-> a.getCost() + Vector2.manDistance(a.getPosition(), start) - b.getCost() - Vector2.manDistance(b.getPosition(), start));
 		pathQueue.add(new GridState(end));
 		List<GridState> closed = new ArrayList<GridState>();
@@ -116,20 +129,22 @@ public class CachedSearch {
 				return true;
 			}
 			
-			for(Vector2 childDir : Generator.directions) {
+			for(Vector2 childDir : Vector2.directions) {
 				Vector2 childPos = Vector2.add(parent.getPosition(), childDir);
-				GridState child = new GridState(parent, childPos, (floor != null && floor.contains(childPos)) ? 1 :  newFloorCost);
-				if(!obsticals.contains(childPos)) {
-					int prevIndex = 0;
-					if((prevIndex = closed.indexOf(child)) != -1) {
-						if(child.getCost() < closed.get(prevIndex).getCost()) {
-							closed.remove(prevIndex);
+				if(childPos.x >= minX-1 && childPos.x <= maxX+1 && childPos.y >= minY-1 && childPos.y <= maxY+1) {
+					GridState child = new GridState(parent, childPos, (floor != null && floor.contains(childPos)) ? 1 :  newFloorCost);
+					if(!obsticals.contains(childPos)) {
+						int prevIndex = 0;
+						if((prevIndex = closed.indexOf(child)) != -1) {
+							if(child.getCost() < closed.get(prevIndex).getCost()) {
+								closed.remove(prevIndex);
+								pathQueue.add(child);
+							}
+						} else if(pathQueue.removeIf(a -> child.equals(a) && child.getCost() < a.getCost())) {
+							pathQueue.add(child);
+						} else {
 							pathQueue.add(child);
 						}
-					} else if(pathQueue.removeIf(a -> child.equals(a) && child.getCost() < a.getCost())) {
-						pathQueue.add(child);
-					} else {
-						pathQueue.add(child);
 					}
 				}
 			}
