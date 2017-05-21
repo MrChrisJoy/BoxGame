@@ -282,13 +282,28 @@ public class GUI extends Application {
 			
 					switch (key.getCode()) {
 					case UP:
-						im.moveItem(1);
+						try {
+							im.moveItem(1, stage);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						break;
 					case DOWN:
-						im.moveItem(-1);
+						try {
+							im.moveItem(-1, stage);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						break;
 					case ENTER:
-						im.moveItem(0);
+						try {
+							im.moveItem(0, stage);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						break;
 
 					case ESCAPE:

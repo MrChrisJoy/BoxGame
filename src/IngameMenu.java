@@ -31,7 +31,7 @@ import javafx.util.Duration;
 
 public class IngameMenu extends Application {
 	private static final Font FONT = Font.font("", FontWeight.BOLD, 20);
-
+	
 	final FileChooser fileChooser = new FileChooser();
 	private VBox menuBox;
 	private int currentItem = 0;
@@ -95,7 +95,7 @@ public class IngameMenu extends Application {
 		}
 	}
 
-	public void moveItem(int code) {
+	public void moveItem(int code, Stage stage) throws Exception {
 		if(code == 1) {
 			if (currentItem > 0) {
 				getMenuItem(currentItem).setActive(false);
@@ -114,7 +114,9 @@ public class IngameMenu extends Application {
 
 		if (code == 0) {
 			switch (getMenuItem(currentItem).getMenuName()) {
-
+			case "MENU" :
+				Menu m = new Menu();
+				m.start(stage);
 			case "OPTIONS":
 				break;
 
