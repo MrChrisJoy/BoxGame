@@ -67,7 +67,6 @@ public class CachedSearch {
 	 * @param obsticals constant locations search must avoid
 	 */
 	public CachedSearch(Vector2 start, Collection<Vector2> obsticals) {
-		//also keep search in bounding region
 		this.start = start;
 		this.obsticals = obsticals;
 		

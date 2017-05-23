@@ -14,6 +14,7 @@ public interface IGenerator {
 	public boolean hasGoal(Vector2 g);
 	public Set<Vector2> getEdges();
 	public void undo();
+	public long getSeed();
 	public void setOnPlayerMove(EventHandler<ActionEvent> eventHandler);
 	public void setOnBoxMove(EventHandler<ActionEvent> eventHandler);
 	public void setOnWin(EventHandler<ActionEvent> eventHandler);

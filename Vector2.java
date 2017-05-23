@@ -5,9 +5,9 @@ public class Vector2 {
 	public static final Vector2 zero = new Vector2(0, 0);
 	
 	public static final int LEFT = 0;
-	public static final int UP = 1;
+	public static final int UP = 3;
 	public static final int RIGHT = 2;
-	public static final int DOWN = 3;
+	public static final int DOWN = 1;
 
 	public static final Vector2[] directions = {new Vector2(-1, 0), new Vector2(0, 1), new Vector2(1, 0), new Vector2(0, -1)};
 	
