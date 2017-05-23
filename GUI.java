@@ -95,7 +95,7 @@ public class GUI extends Application {
 		time.setTextAlignment(TextAlignment.LEFT);
 		time.setVisible(false);
 		Notification notification = new Notification();
-		cachedLevels = new CachedLevels("Guest07");
+		cachedLevels = new CachedLevels(System.getProperty("user.name"));
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			  @Override
