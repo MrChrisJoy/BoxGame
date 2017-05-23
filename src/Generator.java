@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -5,7 +6,11 @@ import java.util.Set;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
-
+/**
+ * 
+ *  Last Edited 24/05/2017		:	Antony.J
+ *
+ */
 public class Generator implements IGenerator {
 	public static Random random = new Random();
 	
@@ -15,6 +20,7 @@ public class Generator implements IGenerator {
 	private List<State> next;
 	
 	private int movedBox;
+	private long seed;
 	
 	private Vector2 playerPosition;
 	private Set<Vector2> floor;
@@ -59,12 +65,14 @@ public class Generator implements IGenerator {
 		}
 	}
 	
-	public void generateLevel(int numBoxes, int numIterations, int difficulty, long seed) {
-		random.setSeed(seed);
-		generateLevel(numBoxes, numIterations, difficulty);
+	public void generateLevel(int numBoxes, int numIterations, int difficulty) {
+		generateLevel(numBoxes, numIterations, difficulty, System.currentTimeMillis());
 	}
 	
-	public void generateLevel(int numBoxes, int numIterations, int difficulty) {
+	public void generateLevel(int numBoxes, int numIterations, int difficulty, long seed) {
+		this.seed = seed;
+		random.setSeed(seed);
+		
 		floor = new HashSet<Vector2>();	
 		edge = new HashSet<Vector2>();	
 		goal = new State(randomPositions(numBoxes));
@@ -74,6 +82,8 @@ public class Generator implements IGenerator {
 			if(temp == null) break;
 			start = temp;
 		}
+		
+		floor.addAll(Arrays.asList(goal.getBoxLocations()));
 		
 		for(Vector2 v : floor) {
 			for(Vector2 dir : Vector2.directions) {
@@ -152,6 +162,10 @@ public class Generator implements IGenerator {
 	public void setOnLose(EventHandler<ActionEvent> eventHandler) {
 		loseHandler = eventHandler;
 	}
+	
+	public long getSeed() {
+		return seed;
+	}
 
 	public void undo() {
 		if(!curr.equals(start)) {
@@ -168,9 +182,6 @@ public class Generator implements IGenerator {
 
 	@Override
 	public void generateLevel() {
-		// TODO Auto-generated method stub
 		
 	}
-
-
 }

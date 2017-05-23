@@ -27,6 +27,9 @@ public class UserGrid {
 	}
 
 	public void readInputGrid() {
+		System.out.println("Starting to read Input");
+		
+		
 		Scanner sc = null;
 		try {
 			Stage stage = null;

@@ -1,3 +1,8 @@
+/**
+ * 
+ *  Last Edited 24/05/2017		:	Antony.J
+ *
+ */
 public class Vector2 {
 	public final int x;
 	public final int y;

@@ -39,6 +39,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+
+/**
+ * 
+ *  Last Edited 24/05/2017		:	Antony.J
+ *
+ */
 public class Menu extends Application {
 
 	public static void main(String[] args) {
@@ -47,7 +53,7 @@ public class Menu extends Application {
 
 
 	private static final Font FONT = Font.font("", FontWeight.BOLD, 18); 
-	final FileChooser fileChooser = new FileChooser();
+//	final FileChooser fileChooser = new FileChooser();
 	private VBox menuBox;
 	// navigator of the menu
 	private int currentItem = 0;
@@ -89,7 +95,7 @@ public class Menu extends Application {
 				switch (getMenuItem(currentItem).getMenuName()) {
 				case "PLAY":
 					
-					gui.setG(new Generator(), "GAME");
+					gui.setG(new Generator(), "PLAY");
 					try {						
 						gui.start(stage);
 					} catch (Exception e) {

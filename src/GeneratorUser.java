@@ -227,4 +227,10 @@ public class GeneratorUser implements IGenerator {
 		// TODO Auto-generated method stub		
 	}
 
+	@Override
+	public long getSeed() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
