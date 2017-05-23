@@ -1,5 +1,0 @@
-#! /bin/sh
-
-java -cp "$CLASSPATH:./bin/" Menu
-
-
