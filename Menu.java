@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+//import Menu.MenuItem;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
@@ -36,6 +37,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -55,8 +57,11 @@ public class Menu extends Application {
 	private static final Font FONT = Font.font("", FontWeight.BOLD, 18); 
 //	final FileChooser fileChooser = new FileChooser();
 	private VBox menuBox;
+	private VBox themeBox;
 	// navigator of the menu
 	private int currentItem = 0;
+	private int themeItem = 0;
+	private Stage stage;
 	GUI gui = new GUI();
 	
 	public void start(Stage stage) throws Exception {
@@ -116,7 +121,91 @@ public class Menu extends Application {
 					break;
 
 				case "OPTIONS":
-					break;
+					
+					try {
+					
+			//		stage.initModality(Modality.APPLICATION_MODAL);
+			//		stage.initOwner(stage);
+					Parent themeRoot = createTheme();
+					Scene themeScene = new Scene (themeRoot);
+					
+					themeScene.setOnKeyPressed(themeEvent -> {
+						int themeTemp;
+						if (themeEvent.getCode() == KeyCode.UP) {
+							if (themeItem > 0) {
+								themeTemp = themeItem;
+								getThemeItem(themeItem - 1).setPrevActive(false);
+								getThemeItem(themeItem).setActive(false);
+								getThemeItem(--themeItem).setActive(true);
+								getThemeItem(themeTemp).setPrevActive(true);
+								// depends on how many choices there are on menu
+								if (themeTemp <= 2)
+									getMenuItem(++themeTemp).setPrevActive(false);
+
+							}
+						}
+
+						if (themeEvent.getCode() == KeyCode.DOWN) {
+							if (themeItem < themeBox.getChildren().size() - 1) {
+								themeTemp = themeItem;
+								getThemeItem(themeItem + 1).setPrevActive(false);
+								getThemeItem(themeItem).setActive(false);
+								getThemeItem(++themeItem).setActive(true);
+								getThemeItem(themeTemp).setPrevActive(true);
+								if (themeTemp >= 1)
+									getThemeItem(--themeTemp).setPrevActive(false);
+
+							}
+						}
+
+						if (themeEvent.getCode() == KeyCode.ENTER) {
+							
+							switch (getThemeItem(themeItem).getMenuName()) {
+								
+							case "THEME 1" :
+								System.out.println("Theme set to 1");
+								gui.setThemeNum(1);
+								break;
+								
+							case "THEME 2" :
+								System.out.println("Theme set to 2");
+								gui.setThemeNum(2);
+								break;
+								
+							case "THEME 3" :
+								
+								gui.setThemeNum(3);
+								break;
+								
+							case "THEME 4" :
+								
+								gui.setThemeNum(4);
+								break;
+								
+							
+							case "RETURN" :
+								try {
+									
+									start(stage);
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								break;
+							}
+							
+						}
+					});
+				//	System.out.println("how many");
+					stage.setScene(themeScene);
+					stage.show();
+					
+				} catch (Exception e) {
+					
+					e.printStackTrace();
+				}
+					
+				break;
 
 				case "EXIT":
 					System.exit(0);
@@ -126,6 +215,49 @@ public class Menu extends Application {
 		stage.setScene(scene);
 
 		stage.show();
+	}
+	
+	
+	private Parent createTheme() {
+		
+		Pane root = new Pane ();
+		root.setPrefSize(900,600);
+		
+		// new Image(url)
+		Image image = new Image("http://i.imgur.com/AGTcz1a.jpg");
+		BackgroundImage background = new BackgroundImage(image, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
+				new BackgroundPosition(Side.LEFT, 0, true, Side.BOTTOM, 0, true), BackgroundSize.DEFAULT);
+
+//		ContentFrame frame = new ContentFrame(createMiddleContent());
+
+//		HBox hbox = new HBox(frame);
+		// space inbetween frames
+//		hbox.setTranslateX(120);
+//		hbox.setTranslateY(50);
+
+		MenuItem t1 = new MenuItem("THEME 1");
+		MenuItem t2 = new MenuItem("THEME 2");
+		MenuItem t3 = new MenuItem("THEME 3");
+		MenuItem t4 = new MenuItem("THEME 4");
+		MenuItem back = new MenuItem("RETURN");
+
+		themeBox = new VBox(10, t1, t2, t3, t4, back);
+		themeBox.setAlignment(Pos.TOP_CENTER);
+		themeBox.setTranslateX(360);
+		themeBox.setTranslateY(300);
+
+//		Text about = new Text("COMP2911 \nMenu Prototype");
+//		about.setTranslateX(50);
+//		about.setTranslateY(500);
+//		about.setFill(Color.WHITE);
+//		about.setFont(FONT);
+//		about.setOpacity(0.2);
+
+		getThemeItem(0).setActive(true);
+		root.setBackground(new Background(background));
+		root.getChildren().addAll(themeBox);
+		
+		return root;
 	}
 	// main layout of the menu with UI
 	private Parent createContent() {
@@ -193,6 +325,11 @@ public class Menu extends Application {
 		if (index < 0)
 			return null;
 		return (MenuItem) menuBox.getChildren().get(index);
+	}
+	private MenuItem getThemeItem(int index) {
+		if (index < 0)
+			return null;
+		return (MenuItem) themeBox.getChildren().get(index);
 	}
 
 	// pane with smoothed out edges

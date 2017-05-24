@@ -60,7 +60,16 @@ public class GUI extends Application {
 	
 	IngameMenu im = new IngameMenu();
 	Parent root = im.createContent();
+	private int themeNum = 1;
 	
+	public int getThemeNum() {
+		return themeNum;
+	}
+
+	public void setThemeNum(int themeNum) {
+		this.themeNum = themeNum;
+	}
+
 	private PhongMaterial box;
 	private PhongMaterial floor;
 	private PhongMaterial goal;
@@ -90,10 +99,12 @@ public class GUI extends Application {
 	@Override 
 	public void start(Stage stage) throws IOException {
 		
-		if(getType().equals("USER")) {
-			g = new GeneratorUser();
-		} else {
+		if(getType().equals("PLAY")){
 			g = new Generator();
+			
+		}
+		if(getType().equals("USER")){
+			g = new GeneratorUser();
 		}
 		
 		text = new Text("");
@@ -287,16 +298,6 @@ public class GUI extends Application {
 		addEdges(level);
 		centreCamera(g.getPlayerLocation());
 		
-		PhongMaterial fog = new PhongMaterial();
-		//fog.setDiffuseMap(new Image("http://www.stickpng.com/assets/images/580b585b2edbce24c47b2636.png"));
-		fog.setDiffuseMap(new Image("http://www.imagequalitylabs.com/resources/uploads/product/product_image1338282549.jpg"));
-		
-		Tile t = new Tile(sceneScale, fog);
-		t.setTranslateX(g.getPlayerLocation().x);
-		t.setTranslateY(g.getPlayerLocation().y);
-		t.setTranslateZ(sceneScale);
-		level.getChildren().add(t);
-		
 		textTransition.playFromStart();
 	}
 	
@@ -353,13 +354,13 @@ public class GUI extends Application {
 			Tile t = new Tile(sceneScale, goal);
 			t.setTranslateX(sceneScale * v.x);
 			t.setTranslateY(sceneScale * v.y);
-			t.setTranslateZ(sceneScale/2);
+			t.setTranslateZ(sceneScale/1.5);
 			root.getChildren().add(t);
 		}
 	}
 	
 	private void addEdges(Group root) {
-		for(Vector2		 v : g.getEdges()) {
+		for(Vector2 v : g.getEdges()) {
 			Box b = new Box(sceneScale, sceneScale, sceneScale*edgeHeight);
 			b.setTranslateX(sceneScale * v.x);
 			b.setTranslateY(sceneScale * v.y);
@@ -393,21 +394,40 @@ public class GUI extends Application {
 	}
 	
 	private void setupMaterials() {
-		box = new PhongMaterial();
-		box.setSpecularColor(new Color(0.05, 0.05, 0.05, 1));
-		box.setBumpMap(new Image("https://www.filterforge.com/filters/9452-normal.jpg"));
-		box.setDiffuseMap(new Image("https://www.filterforge.com/filters/9452.jpg"));
-		floor = new PhongMaterial();
-		floor.setSpecularColor(Color.DIMGRAY);
-		floor.setDiffuseMap(new Image("https://www.filterforge.com/filters/10767.jpg"));
-		floor.setBumpMap(new Image("https://www.filterforge.com/filters/10767-normal.jpg"));
-		player = new PhongMaterial(Color.DIMGRAY);
-		goal = new PhongMaterial(Color.GREY);
-		goal.setSpecularColor(Color.SLATEGRAY);
-		goal.setDiffuseMap(new Image("https://www.filterforge.com/filters/10767.jpg")); //11075
-		goal.setBumpMap(new Image("https://www.filterforge.com/filters/10767-normal.jpg"));
-		edge = new PhongMaterial(Color.BLACK);
-		edge.setSpecularPower(0);
+		if (themeNum == 1) {
+			box = new PhongMaterial();
+			box.setSpecularColor(new Color(0.05, 0.05, 0.05, 1));
+			box.setDiffuseMap(new Image("https://www.filterforge.com/filters/9452.jpg"));
+			box.setBumpMap(new Image("https://www.filterforge.com/filters/9452-normal.jpg"));
+			floor = new PhongMaterial();
+			floor.setSpecularColor(Color.DIMGRAY);
+			floor.setDiffuseMap(new Image("https://www.filterforge.com/filters/10767.jpg"));
+			floor.setBumpMap(new Image("https://www.filterforge.com/filters/10767-normal.jpg"));
+			player = new PhongMaterial(Color.DIMGRAY);
+			goal = new PhongMaterial(Color.GREY);
+			goal.setSpecularColor(Color.SLATEGRAY);
+			goal.setDiffuseMap(new Image("https://www.filterforge.com/filters/10767.jpg")); //11075
+			goal.setBumpMap(new Image("https://www.filterforge.com/filters/10767-normal.jpg"));
+			edge = new PhongMaterial(Color.BLACK);
+			edge.setSpecularPower(0);
+		}
+		else if (themeNum == 2) { 
+			box = new PhongMaterial();
+			box.setSpecularColor(new Color(0.05, 0.05, 0.05, 1));
+			box.setDiffuseMap(new Image("https://www.filterforge.com/filters/9452.jpg"));
+			floor = new PhongMaterial();
+			floor.setDiffuseMap(new Image("https://s-media-cache-ak0.pinimg.com/originals/50/0a/e6/500ae6da564cba60634f46aa397a6e79.gif"));
+			player = new PhongMaterial(Color.DIMGRAY);
+			goal = new PhongMaterial(Color.GREY);
+			goal.setSpecularColor(Color.SLATEGRAY);
+			goal.setDiffuseMap(new Image ("https://articulate-heroes.s3.amazonaws.com/uploads/rte/kgrtehja_DancingBannana.gif"));
+			edge = new PhongMaterial();
+			edge.setDiffuseMap(new Image("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFHAnHqLn39ayUj-4cArPKZeLNeiBbvt-xKmUvkA9SiNe3WPlurw"));
+			edge.setSpecularPower(0);		
+		}
+		else if (themeNum == 3) {
+			
+		}
 	}
 	
 
