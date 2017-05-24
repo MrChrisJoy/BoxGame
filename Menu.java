@@ -57,8 +57,10 @@ public class Menu extends Application {
 	private static final Font FONT = Font.font("", FontWeight.BOLD, 18); 
 //	final FileChooser fileChooser = new FileChooser();
 	private VBox menuBox;
+	private VBox themeBox;
 	// navigator of the menu
 	private int currentItem = 0;
+	private int themeItem = 0;
 	private Stage stage;
 	GUI gui = new GUI();
 	
@@ -130,12 +132,12 @@ public class Menu extends Application {
 					themeScene.setOnKeyPressed(themeEvent -> {
 						int themeTemp;
 						if (themeEvent.getCode() == KeyCode.UP) {
-							if (currentItem > 0) {
-								themeTemp = currentItem;
-								getMenuItem(currentItem - 1).setPrevActive(false);
-								getMenuItem(currentItem).setActive(false);
-								getMenuItem(--currentItem).setActive(true);
-								getMenuItem(themeTemp).setPrevActive(true);
+							if (themeItem > 0) {
+								themeTemp = themeItem;
+								getThemeItem(themeItem - 1).setPrevActive(false);
+								getThemeItem(themeItem).setActive(false);
+								getThemeItem(--themeItem).setActive(true);
+								getThemeItem(themeTemp).setPrevActive(true);
 								// depends on how many choices there are on menu
 								if (themeTemp <= 2)
 									getMenuItem(++themeTemp).setPrevActive(false);
@@ -144,21 +146,21 @@ public class Menu extends Application {
 						}
 
 						if (themeEvent.getCode() == KeyCode.DOWN) {
-							if (currentItem < menuBox.getChildren().size() - 1) {
-								themeTemp = currentItem;
-								getMenuItem(currentItem + 1).setPrevActive(false);
-								getMenuItem(currentItem).setActive(false);
-								getMenuItem(++currentItem).setActive(true);
-								getMenuItem(themeTemp).setPrevActive(true);
+							if (themeItem < themeBox.getChildren().size() - 1) {
+								themeTemp = themeItem;
+								getThemeItem(themeItem + 1).setPrevActive(false);
+								getThemeItem(themeItem).setActive(false);
+								getThemeItem(++themeItem).setActive(true);
+								getThemeItem(themeTemp).setPrevActive(true);
 								if (themeTemp >= 1)
-									getMenuItem(--themeTemp).setPrevActive(false);
+									getThemeItem(--themeTemp).setPrevActive(false);
 
 							}
 						}
 
 						if (themeEvent.getCode() == KeyCode.ENTER) {
 							
-							switch (getMenuItem(currentItem).getMenuName()) {
+							switch (getThemeItem(themeItem).getMenuName()) {
 								
 							case "THEME 1" :
 								System.out.println("Theme set to 1");
@@ -183,6 +185,7 @@ public class Menu extends Application {
 							
 							case "RETURN" :
 								try {
+									
 									start(stage);
 								} catch (Exception e) {
 									// TODO Auto-generated catch block
@@ -238,10 +241,10 @@ public class Menu extends Application {
 		MenuItem t4 = new MenuItem("THEME 4");
 		MenuItem back = new MenuItem("RETURN");
 
-		menuBox = new VBox(10, t1, t2, t3, t4, back);
-		menuBox.setAlignment(Pos.TOP_CENTER);
-		menuBox.setTranslateX(360);
-		menuBox.setTranslateY(300);
+		themeBox = new VBox(10, t1, t2, t3, t4, back);
+		themeBox.setAlignment(Pos.TOP_CENTER);
+		themeBox.setTranslateX(360);
+		themeBox.setTranslateY(300);
 
 //		Text about = new Text("COMP2911 \nMenu Prototype");
 //		about.setTranslateX(50);
@@ -250,9 +253,9 @@ public class Menu extends Application {
 //		about.setFont(FONT);
 //		about.setOpacity(0.2);
 
-		getMenuItem(0).setActive(true);
+		getThemeItem(0).setActive(true);
 		root.setBackground(new Background(background));
-		root.getChildren().addAll(menuBox);
+		root.getChildren().addAll(themeBox);
 		
 		return root;
 	}
@@ -322,6 +325,11 @@ public class Menu extends Application {
 		if (index < 0)
 			return null;
 		return (MenuItem) menuBox.getChildren().get(index);
+	}
+	private MenuItem getThemeItem(int index) {
+		if (index < 0)
+			return null;
+		return (MenuItem) themeBox.getChildren().get(index);
 	}
 
 	// pane with smoothed out edges
