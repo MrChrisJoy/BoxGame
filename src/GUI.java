@@ -40,7 +40,8 @@ import javafx.util.Duration;
 
 /**
  * 
- * Last Edited 24/05/2017		:	Antony.J
+ * Last Edited 24/05/2017	04:00 		:	Antony.J
+ * Last Edited 24/05/2017	12:35		:	Antony.J
  *
  */
 public class GUI extends Application {
@@ -52,8 +53,7 @@ public class GUI extends Application {
 	
 	private String type = "";
 	private boolean canPlay = true;
-	
-	private boolean userGen = false;
+
 	private Box[] boxes;
 	private Group playerGroup;
 	private IGenerator g;
@@ -89,6 +89,15 @@ public class GUI extends Application {
 	
 	@Override 
 	public void start(Stage stage) throws IOException {
+		
+		if(getType().equals("PLAY")){
+			g = new Generator();
+			
+		}
+		if(getType().equals("USER")){
+			g = new GeneratorUser();
+		}
+		
 		text = new Text("");
 		text.setFill(Color.WHITE);
 		text.setFont(new Font(20));
@@ -106,7 +115,7 @@ public class GUI extends Application {
 		time.setTextAlignment(TextAlignment.LEFT);
 		time.setVisible(false);
 		Notification notification = new Notification();
-		cachedLevels = new CachedLevels("Guest07");
+		cachedLevels = new CachedLevels(System.getProperty("user.name"));
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			  @Override
@@ -124,7 +133,7 @@ public class GUI extends Application {
 		notification.onClick(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent m) {
-				if(!settingRecord ) { // is the user is playing his generated game, then desable this
+				if(!settingRecord) { // is the user is playing his generated game, then desable this
 					newLevel(record.seed);
 					text.setText("");
 					settingRecord = true;
@@ -162,7 +171,6 @@ public class GUI extends Application {
 		
 		level = new Group();
 		setupMaterials();		
-		
 		newLevel();
 		
 		//Group 3D nodes into a sub-scene with perspective camera
@@ -183,26 +191,28 @@ public class GUI extends Application {
 		
 		
 		// Set up engine events
-		getG().setOnPlayerMove(new EventHandler<ActionEvent>() {
+		g.setOnPlayerMove(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
+				
 				movePlayer(g.getPlayerLocation(), camera);
 			}
 		});
-		getG().setOnBoxMove(new EventHandler<ActionEvent>() {
+		g.setOnBoxMove(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				moveBox(g.getBoxMovedBox(), g.getBoxLocations()[g.getBoxMovedBox()]);
 			}
 		});
-		getG().setOnWin(new EventHandler<ActionEvent>() {
+		g.setOnWin(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				newLevel();
+				won();
 				System.out.println("You won");
 			}
 		});
-		getG().setOnLose(new EventHandler<ActionEvent>() {
+		g.setOnLose(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				newLevel();
@@ -249,22 +259,20 @@ public class GUI extends Application {
 	
 	private void newLevel() {
 		if(getType().equals("PLAY")){
-
-			g = new Generator();
-			getG().generateLevel(5, 20, 100);
+		//	g = new Generator();
+			g.generateLevel(5, 20, 100);
 		}
 		if(getType().equals("USER")){
-
-			g = new GeneratorUser();
-			getG().generateLevel();
+			g.generateLevel();
 		}
 		drawLevel();
 	}
 	
 	private void newLevel(long seed) {
-		g = new Generator();
-		getG().generateLevel(5, 20, 100, seed);
+	//	g = new Generator();
+		g.generateLevel(5, 20, 100, seed);
 		drawLevel();
+		System.out.println("Game Got created.......");
 	}
 	
 	public void drawLevel() {
@@ -475,20 +483,13 @@ public class GUI extends Application {
 		});
 	}
 
-	public void setG(IGenerator g, String type) {
-		this.g = g;
-		this.type = type;
-		
+	public void setG(String type) {
+		this.type = type;		
 	}
 	
 	private String getType(){
 		return type;
 	}
-	
-	private IGenerator getG(){
-		return g;
-	}	
-	
 	
 	private void setupSwipeEvents(Scene scene) {
 		scene.setOnSwipeDown(new EventHandler<SwipeEvent>() {

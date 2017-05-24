@@ -61,6 +61,7 @@ public class Generator implements IGenerator {
 		}
 		if(floor.contains(newPos)) {
 			playerPosition = newPos;
+			System.out.println("Player Location: " + playerPosition.toString());
 			positionHandler.handle(null);
 		}
 	}

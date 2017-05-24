@@ -42,7 +42,7 @@ import javafx.util.Duration;
 
 /**
  * 
- *  Last Edited 24/05/2017		:	Antony.J
+ * Last Edited 24/05/2017	12:35		:	Antony.J
  *
  */
 public class Menu extends Application {
@@ -95,7 +95,7 @@ public class Menu extends Application {
 				switch (getMenuItem(currentItem).getMenuName()) {
 				case "PLAY":
 					
-					gui.setG(new Generator(), "PLAY");
+					gui.setG("PLAY");
 					try {						
 						gui.start(stage);
 					} catch (Exception e) {
@@ -105,7 +105,7 @@ public class Menu extends Application {
 					break;
 
 				case "SANDBOX MODE":
-					gui.setG(new GeneratorUser(), "USER");
+					gui.setG("USER");
 					try {
 						gui.start(stage);
 					} catch (IOException e) {
