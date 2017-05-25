@@ -98,15 +98,8 @@ public class GUI extends Application {
 	
 	@Override 
 	public void start(Stage stage) throws IOException {
-		
-		if(getType().equals("PLAY")){
-			g = new Generator();
-			
-		}
-		if(getType().equals("USER")){
-			g = new GeneratorUser();
-		}
-		
+		g = new Generator();
+
 		text = new Text("");
 		text.setFill(Color.WHITE);
 		text.setFont(new Font(20));
@@ -267,13 +260,10 @@ public class GUI extends Application {
 	}
 	
 	private void newLevel() {
-		if(getType().equals("PLAY")){
+		
 		//	g = new Generator();
 			g.generateLevel(5, 20, 100);
-		}
-		if(getType().equals("USER")){
-			g.generateLevel();
-		}
+
 		drawLevel();
 	}
 	
