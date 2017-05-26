@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -24,7 +25,7 @@ public class IngameMenuButtonVersion {
 	public IngameMenuButtonVersion(EventHandler<MouseEvent> menuHandler, EventHandler<MouseEvent> instructionHandler) {
 		root = new Pane();
 
-		HBox menuBox = new HBox(10,  new RoundButton("MENU", menuHandler), new RoundButton("MENU", instructionHandler));
+		HBox menuBox = new HBox(10,  new RoundButton("MENU", menuHandler), new RoundButton("HELP", instructionHandler));
 
 		root.getChildren().add(menuBox);
 	}
@@ -39,8 +40,8 @@ public class IngameMenuButtonVersion {
 			Button roundButton = new Button(name);
 			roundButton.setId(name);
 			roundButton.setOnMouseClicked(handler);
-			roundButton.setStyle("-fx-background-radius: 5em; " + "-fx-min-width: 30px; " + "-fx-min-height: 30px; "
-					+ "-fx-max-width: 30px; " + "-fx-max-height: 30px;");
+			roundButton.setStyle("-fx-background-radius: 5em; " + "-fx-min-width: 0px; " + "-fx-min-height: 30px; "
+					+ "-fx-max-width: 300px; " + "-fx-max-height: 300px;");
 			getChildren().add(roundButton);
 		}
 	}

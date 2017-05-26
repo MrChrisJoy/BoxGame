@@ -180,21 +180,17 @@ public class BoxSystem extends Application {
 
 		//Create camera
 		camera = new PerspectiveCamera(false);
-		camera.setTranslateX(-sceneScale * cameraHeight);
-		camera.setRotationAxis(new Point3D(0, 0, 1));
-		camera.setRotate(-80);
 		
 		cameraTransition = new TranslateTransition();
 		cameraTransition.setNode(camera);
 		cameraTransition.setDuration(Duration.millis(400));
 		cameraTransition.setInterpolator(Interpolator.EASE_OUT);
 		
-		Vector2 cameraAnimStart = new Vector2(cameraHeight * sceneScale, -cameraHeight * sceneScale); //y z
+		Vector2 cameraAnimStart = new Vector2(cameraHeight * sceneScale/2, -cameraHeight * sceneScale/2); //y z
 		
-		cameraRotation.setAxis(new Point3D(0, 0, 1));
+		//cameraRotation.setAxis(new Point3D(0, 0, 1));
 		cameraRotation.setPivotY(-cameraAnimStart.y);
-		cameraRotation.setPivotX(-cameraAnimStart.x);
-		
+		cameraRotation.setPivotZ(-cameraAnimStart.x);
 		
 		cameraAnimation = new Timeline(
 				new KeyFrame(Duration.ZERO, new KeyValue(cameraRotation.angleProperty(), 0)),
@@ -204,7 +200,9 @@ public class BoxSystem extends Application {
 		camera.getTransforms().add(cameraRotation);
 		cameraAnimation.playFromStart();
 		
-		
+		camera.setTranslateX(-sceneScale * cameraHeight);
+		camera.setRotationAxis(new Point3D(0, 0,1));
+		camera.setRotate(-90);
 
 		//Create level
 		level = new Group();

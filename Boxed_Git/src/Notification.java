@@ -16,7 +16,7 @@ public class Notification extends Group {
 	private ImageView i = new ImageView();
 	private final Vector2 in = new Vector2(400, 200);
 	private final Vector2 out = new Vector2(150, 200);
-	private final Vector2 mid = new Vector2(295, 200);
+	private final Vector2 mid = new Vector2(310, 200);
 	
 	public Notification() {
 		tt.setNode(this);
