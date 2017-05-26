@@ -1,4 +1,3 @@
-
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -56,8 +55,6 @@ public class Menu extends Application {
 	public static void main(String[] args) {
 		launch(args);
 	}
-	private final Background focusBackground = new Background( new BackgroundFill( Color.web( "#000000" ), CornerRadii.EMPTY, Insets.EMPTY ) );
-    private final Background unfocusBackground = new Background( new BackgroundFill( Color.web( "#F4F4F4" ), CornerRadii.EMPTY, Insets.EMPTY ) );
 	private static final Font FONT = Font.font("", FontWeight.BOLD, 18);
 	private VBox menuBox;
 	// navigator of the menu
@@ -86,7 +83,7 @@ public class Menu extends Application {
 			if (event.getCode() == KeyCode.ENTER) {
 				switch (getMenuItem(currentItem).getMenuName()) {
 				case "PLAY":
-					GUI gui = new GUI();
+					BoxSystem gui = new BoxSystem();
 					gui.setG("PLAY");
 					try {
 						gui.start(stage);
@@ -95,19 +92,6 @@ public class Menu extends Application {
 						e.printStackTrace();
 					}
 					break;
-
-				case "SANDBOX MODE":
-					GUI guiU = new GUI();
-					guiU.setG("USER");
-					try {
-						guiU.start(stage);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-
-					}
-					break;
-
 				case "OPTIONS":
 					break;
 
@@ -125,16 +109,13 @@ public class Menu extends Application {
 	Parent createContent() {
 		StackPane root = new StackPane();
 		root.setPrefSize(500, 500);
-		Rectangle r = new Rectangle(200,500);
+		Rectangle r = new Rectangle(2000,5000);
 		MenuItem exit = new MenuItem("EXIT");
 		MenuItem play = new MenuItem("PLAY");
 		MenuItem sandbox = new MenuItem("SANDBOX MODE");
 		MenuItem options = new MenuItem("OPTIONS");
 		r.setFill(Color.ALICEBLUE);
-		// Button exit = new Button("EXIT");
-		// Button play = new Button("PLAY");
-		// Button sandbox = new Button("SANDBOX");
-		// Button options = new Button("OPTIONS");
+
 
 		menuBox = new VBox(10, play, sandbox, options, exit);
 		menuBox.setTranslateX(360);
@@ -149,10 +130,8 @@ public class Menu extends Application {
 		about.setFill(Color.WHITE);
 		about.setFont(FONT);
 		about.setOpacity(0.2);
-
-		menuBox.setStyle("-fx-background-color: rgba(0, 0, 0, 0);");
 		getMenuItem(0).setActive(true);
-		root.getChildren().addAll(menuBox, about, r);
+		root.getChildren().addAll(r, menuBox, about);
 		return menuBox;
 	}
 
@@ -188,6 +167,9 @@ public class Menu extends Application {
 
 			getChildren().addAll(button);
 			setActive(false);
+			
+			
+		
 
 		}
 
@@ -207,9 +189,9 @@ public class Menu extends Application {
 				Button x = (Button) event.getSource();
 				switch (x.getId()) {
 				case "PLAY":
-					GUI gui = new GUI();
+					BoxSystem gui = new BoxSystem();
 					try {
-						gui.start(GUI.MenuStage);
+						gui.start(BoxSystem.MenuStage);
 						gui.turnOffMenu();
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -217,18 +199,6 @@ public class Menu extends Application {
 					}
 
 					break;
-				case "SANDBOX MODE":
-					GUI guiU = new GUI();
-					guiU.setG("USER");
-					try {
-						guiU.start(GUI.MenuStage);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-
-					}
-					break;
-
 				case "OPTIONS":
 					break;
 

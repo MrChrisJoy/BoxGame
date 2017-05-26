@@ -13,21 +13,12 @@ public class Vector2 {
 	public static final int UP = 1;
 	public static final int RIGHT = 2;
 	public static final int DOWN = 3;
-	private BlockType blockType;
 	
 	public static final Vector2[] directions = {new Vector2(-1, 0), new Vector2(0, 1), new Vector2(1, 0), new Vector2(0, -1)};
 	
 	public Vector2(int x, int y) {
 		this.x = x;
 		this.y = y;
-	}
-	
-	public BlockType getBlockType() {
-		return this.blockType;
-	}
-	
-	public void setBlockType(BlockType type) {
-		this.blockType = type;
 	}
 	
 	public static Vector2 add(Vector2 v1, Vector2 v2) {

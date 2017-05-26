@@ -43,7 +43,7 @@ public class IngameMenuButtonVersion extends Application {
 	}
 
 	public static class RoundButton extends Parent {
-		RoundButton(String name) {
+		public RoundButton(String name) {
 			Button roundButton = new Button(name);
 			roundButton.setId(name);
 			roundButton.setOnAction(myHandler);
@@ -60,7 +60,7 @@ public class IngameMenuButtonVersion extends Application {
 			Button x = (Button) event.getSource();
 			switch (x.getId()) {
 			case "MENU":
-				GUI gui = new GUI();
+				BoxSystem gui = new BoxSystem();
 				try {
 					gui.turnOnMenu();
 				} catch (Exception e) {
