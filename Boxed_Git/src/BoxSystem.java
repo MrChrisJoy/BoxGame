@@ -1,11 +1,7 @@
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import javafx.animation.FadeTransition;
@@ -20,20 +16,17 @@ import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
 import javafx.scene.Camera;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.SwipeEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -44,7 +37,6 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 /**
@@ -60,9 +52,6 @@ public class BoxSystem extends Application {
 	private final float cameraAngle = 20;
 	private final float edgeHeight = 20;
 
-	private TranslateTransition tt = new TranslateTransition();
-	private final Vector2 in = new Vector2(-200, 150);
-	private final Vector2 out = new Vector2(0, 150);
 	
 	private String type = "";
 	public static boolean mainMenu = true;
@@ -72,10 +61,10 @@ public class BoxSystem extends Application {
 	private Group playerGroup;
 	private IGenerator g;
 	
-	private Menu m = new Menu();
-	private Parent mRoot = m.createContent();
-	private IngameMenuButtonVersion im = new IngameMenuButtonVersion();
-	private Parent bRoot = im.createContent();
+	private Menu m;
+	private Parent mRoot;
+	private IngameMenuButtonVersion im;
+	private Parent bRoot;
 	
 	private PhongMaterial box;
 	private PhongMaterial floor;
@@ -85,8 +74,11 @@ public class BoxSystem extends Application {
 
 	private TranslateTransition cameraTransition;
 	private FadeTransition textTransition;
-	private Timeline playerTransition;
-	private Rotate rotation = new Rotate();
+	
+	private Timeline playerAnimation;
+	private Timeline cameraAnimation;
+	private Rotate playerRotation = new Rotate();
+	private Rotate cameraRotation = new Rotate();
 
 	private PerspectiveCamera camera;
 	private Group level;
@@ -109,9 +101,13 @@ public class BoxSystem extends Application {
 
 	@Override
 	public void start(Stage stage) throws IOException {
-		MenuStage = stage;
 		g = new Generator();
-
+		m = new Menu(e->turnOffMenu(), e->System.exit(0));
+		mRoot = m.getGroup();
+		
+		im = new IngameMenuButtonVersion(e->turnOnMenu(), e->System.out.println("Instructions"));
+		bRoot = im.getGroup();
+		
 		//Center text
 		text = new Text("");
 		text.setFill(Color.WHITE);
@@ -184,13 +180,31 @@ public class BoxSystem extends Application {
 
 		//Create camera
 		camera = new PerspectiveCamera(false);
-		camera.setTranslateZ(-sceneScale * cameraHeight);
-		camera.setRotationAxis(new Point3D(1, 0, 0));
-		camera.setRotate(cameraAngle);
+		camera.setTranslateX(-sceneScale * cameraHeight);
+		camera.setRotationAxis(new Point3D(0, 0, 1));
+		camera.setRotate(-80);
+		
 		cameraTransition = new TranslateTransition();
 		cameraTransition.setNode(camera);
 		cameraTransition.setDuration(Duration.millis(400));
 		cameraTransition.setInterpolator(Interpolator.EASE_OUT);
+		
+		Vector2 cameraAnimStart = new Vector2(cameraHeight * sceneScale, -cameraHeight * sceneScale); //y z
+		
+		cameraRotation.setAxis(new Point3D(0, 0, 1));
+		cameraRotation.setPivotY(-cameraAnimStart.y);
+		cameraRotation.setPivotX(-cameraAnimStart.x);
+		
+		
+		cameraAnimation = new Timeline(
+				new KeyFrame(Duration.ZERO, new KeyValue(cameraRotation.angleProperty(), 0)),
+				new KeyFrame(Duration.millis(3000), new KeyValue(cameraRotation.angleProperty(), 360)));
+		
+		cameraAnimation.setCycleCount(Timeline.INDEFINITE);
+		camera.getTransforms().add(cameraRotation);
+		cameraAnimation.playFromStart();
+		
+		
 
 		//Create level
 		level = new Group();
@@ -208,13 +222,8 @@ public class BoxSystem extends Application {
 		StackPane pane = new StackPane();
 		
 		//Set translations for menu
-		pane.getChildren().addAll(subScene, time, text, bRoot, notification);
-		tt.setNode(mRoot);
-		tt.setDuration(Duration.millis(1000));
-		tt.setInterpolator(Interpolator.EASE_BOTH);
-		pane.getChildren().add(mRoot);
-		mRoot.setTranslateX(in.x);
-		mRoot.setTranslateY(in.y);
+		pane.getChildren().addAll(subScene, time, text, bRoot, mRoot, notification);
+		mRoot.setTranslateY(200);
 		bRoot.setTranslateX(380);
 		bRoot.setTranslateY(0);
 		
@@ -334,11 +343,11 @@ public class BoxSystem extends Application {
 	}
 
 	private void centreCamera(Vector2 pos) {
-		cameraTransition.stop();
-		cameraTransition.setToX(sceneScale * pos.x - sceneDimensions.x / 2.0 * camera.getScaleX());
-		cameraTransition.setToY(sceneScale * pos.y - sceneDimensions.y / 2.0 * camera.getScaleY()
-				+ (cameraAngle * cameraHeight * sceneScale) / (90 - cameraAngle));
-		cameraTransition.play();
+		//cameraTransition.stop();
+		//cameraTransition.setToX(sceneScale * pos.x - sceneDimensions.x / 2.0 * camera.getScaleX());
+		//cameraTransition.setToY(sceneScale * pos.y - sceneDimensions.y / 2.0 * camera.getScaleY()
+				//+ (cameraAngle * cameraHeight * sceneScale) / (90 - cameraAngle));
+		//cameraTransition.play();
 	}
 
 	private void createPlayerGroup(Vector2 start) {
@@ -353,9 +362,9 @@ public class BoxSystem extends Application {
 		playerGroup.setTranslateX(sceneScale * start.x);
 		playerGroup.setTranslateY(sceneScale * start.y);
 
-		playerTransition = new Timeline(new KeyFrame(Duration.ZERO, new KeyValue(rotation.angleProperty(), -90)),
-				new KeyFrame(Duration.millis(150), new KeyValue(rotation.angleProperty(), 0)));
-
+		playerAnimation = new Timeline(
+				new KeyFrame(Duration.ZERO, new KeyValue(playerRotation.angleProperty(), -90)),
+				new KeyFrame(Duration.millis(150), new KeyValue(playerRotation.angleProperty(), 0)));
 	}
 
 	public void createBoxes() {
@@ -408,17 +417,17 @@ public class BoxSystem extends Application {
 		Vector2 dir = new Vector2(newPos.x - (int) playerGroup.getTranslateX() / sceneScale,
 				newPos.y - (int) playerGroup.getTranslateY() / sceneScale);
 
-		rotation.setAxis(new Point3D(dir.y, -dir.x, 0));
-		rotation.setPivotZ(sceneScale / 2);
-		rotation.setPivotY(-dir.y * sceneScale / 2);
-		rotation.setPivotX(-dir.x * sceneScale / 2);
+		playerRotation.setAxis(new Point3D(dir.y, -dir.x, 0));
+		playerRotation.setPivotZ(sceneScale / 2);
+		playerRotation.setPivotY(-dir.y * sceneScale / 2);
+		playerRotation.setPivotX(-dir.x * sceneScale / 2);
 
-		playerGroup.getTransforms().remove(rotation);
+		playerGroup.getTransforms().remove(playerRotation);
 		playerGroup.setTranslateX(newPos.x * sceneScale);
 		playerGroup.setTranslateY(newPos.y * sceneScale);
-		playerGroup.getTransforms().add(rotation);
+		playerGroup.getTransforms().add(playerRotation);
 
-		playerTransition.playFromStart();
+		playerAnimation.playFromStart();
 		centreCamera(newPos);
 	}
 
@@ -447,27 +456,17 @@ public class BoxSystem extends Application {
 
 
 	public void turnOnMenu() {
-		tt.setToX(out.x);
-		tt.playFromStart();
 		mainMenu = true;
-		System.out.print("1");
+		mRoot.setVisible(true);
 	}
 
 	public void turnOffMenu() {
-		tt.setToX(in.x);
-		tt.playFromStart();
+		System.out.println("Howdy");
 		mainMenu = false;
-		System.out.println("2");
+		mRoot.setVisible(false);
+		newLevel();
 	}
-
-	public void setG(String type) {
-		this.type = type;
-	}
-
-	private String getType() {
-		return type;
-	}
-
+	
 	private void setupSwipeEvents(Scene scene) {
 		scene.setOnSwipeDown(new EventHandler<SwipeEvent>() {
 			@Override
