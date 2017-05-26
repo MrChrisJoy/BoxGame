@@ -28,15 +28,14 @@ public class IngameMenuButtonVersion extends Application {
 		stage.show();
 	}
 
-	static Parent createContent() {
+	Parent createContent() {
 		Pane root = new Pane();
 
 		RoundButton menu = new RoundButton("MENU");
+		RoundButton restart = new RoundButton("RESTART");
 		RoundButton exit = new RoundButton("EXIT");
-		RoundButton print1 = new RoundButton("PAUSE");
-		RoundButton print2 = new RoundButton("PRINT2");
 
-		HBox menuBox = new HBox(10, menu, exit, print1, print2);
+		HBox menuBox = new HBox(10, menu, restart, exit);
 
 		root.getChildren().add(menuBox);
 		return root;
@@ -48,8 +47,8 @@ public class IngameMenuButtonVersion extends Application {
 			Button roundButton = new Button(name);
 			roundButton.setId(name);
 			roundButton.setOnAction(myHandler);
-			roundButton.setStyle("-fx-background-radius: 5em; " + "-fx-min-width: 60px; " + "-fx-min-height: 60px; "
-					+ "-fx-max-width: 60px; " + "-fx-max-height: 60px;");
+			roundButton.setStyle("-fx-background-radius: 5em; " + "-fx-min-width: 30px; " + "-fx-min-height: 30px; "
+					+ "-fx-max-width: 30px; " + "-fx-max-height: 30px;");
 			getChildren().add(roundButton);
 		}
 	}
@@ -61,20 +60,17 @@ public class IngameMenuButtonVersion extends Application {
 			Button x = (Button) event.getSource();
 			switch (x.getId()) {
 			case "MENU":
+				GUI gui = new GUI();
 				try {
-					Menu m = new Menu();
-					Parent mRoot = m.createContent();
+					gui.turnOnMenu();
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
 				break;
-			case "PAUSE":
+			case "RESTART":
 				System.out.println(1);
-				break;
-			case "PRINT2":
-				System.out.println(2);
 				break;
 			case "EXIT":
 				System.exit(0);

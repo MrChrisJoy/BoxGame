@@ -61,9 +61,7 @@ public class GUI extends Application {
 
 	private TranslateTransition tt = new TranslateTransition();
 	private final Vector2 in = new Vector2(-200, 150);
-	private final Vector2 out = new Vector2(-50, 150);
-	private final Vector2 mid = new Vector2(295, 200);
-	
+	private final Vector2 out = new Vector2(0, 150);
 		
 	
 	private String type = "";
@@ -212,8 +210,8 @@ public class GUI extends Application {
 		pane.getChildren().add(mRoot);
 		mRoot.setTranslateX(in.x);
 		mRoot.setTranslateY(in.y);
-		bRoot.setTranslateX(295);
-		bRoot.setTranslateY(200);
+		bRoot.setTranslateX(380);
+		bRoot.setTranslateY(0);
 		
 		// Create main scene
 		if(mainMenu = true);
@@ -292,7 +290,8 @@ public class GUI extends Application {
 		newLevel();
 	}
 
-	private void newLevel() {
+	void newLevel() {
+		g = new Generator();
 		g.generateLevel(5, 20, 100);
 		drawLevel();
 	}
@@ -496,12 +495,14 @@ public class GUI extends Application {
 		tt.setToX(out.x);
 		tt.playFromStart();
 		mainMenu = true;
+		System.out.print("1");
 	}
 
 	public void turnOffMenu() {
 		tt.setToX(in.x);
 		tt.playFromStart();
 		mainMenu = false;
+		System.out.println("2");
 	}
 
 	public void setG(String type) {
