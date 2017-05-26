@@ -30,7 +30,5 @@ public class Tile extends MeshView {
 		this.setCullFace(CullFace.FRONT);
 		this.setMesh(m);
 		this.setMaterial(mat);
-		
-		System.out.println("VERTESXXXXXX  " + VertexFormat.POINT_NORMAL_TEXCOORD);
 	}
 }

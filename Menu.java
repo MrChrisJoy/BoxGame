@@ -8,10 +8,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-//import Menu.MenuItem;
 import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
@@ -37,14 +39,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
-
 
 /**
  * 
- * Last Edited 24/05/2017	12:35		:	Antony.J
+ * Last Edited 24/05/2017 12:35 : Antony.J
  *
  */
 public class Menu extends Application {
@@ -53,20 +54,16 @@ public class Menu extends Application {
 		launch(args);
 	}
 
-
-	private static final Font FONT = Font.font("", FontWeight.BOLD, 18); 
-//	final FileChooser fileChooser = new FileChooser();
+	public static Stage MenuStage;
+	private static final Font FONT = Font.font("", FontWeight.BOLD, 18);
 	private VBox menuBox;
-	private VBox themeBox;
 	// navigator of the menu
 	private int currentItem = 0;
-	private int themeItem = 0;
-	private Stage stage;
-	GUI gui = new GUI();
-	
+
+
 	public void start(Stage stage) throws Exception {
 		Scene scene = new Scene(createContent());
-
+		MenuStage = stage;
 		scene.setOnKeyPressed(event -> {
 			int temp;
 			if (event.getCode() == KeyCode.UP) {
@@ -99,9 +96,9 @@ public class Menu extends Application {
 			if (event.getCode() == KeyCode.ENTER) {
 				switch (getMenuItem(currentItem).getMenuName()) {
 				case "PLAY":
-					
+					GUI gui = new GUI();
 					gui.setG("PLAY");
-					try {						
+					try {
 						gui.start(stage);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -110,9 +107,10 @@ public class Menu extends Application {
 					break;
 
 				case "SANDBOX MODE":
-					gui.setG("USER");
+					GUI guiU = new GUI();
+					guiU.setG("USER");
 					try {
-						gui.start(stage);
+						guiU.start(stage);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -121,171 +119,45 @@ public class Menu extends Application {
 					break;
 
 				case "OPTIONS":
-					
-					try {
-					
-			//		stage.initModality(Modality.APPLICATION_MODAL);
-			//		stage.initOwner(stage);
-					Parent themeRoot = createTheme();
-					Scene themeScene = new Scene (themeRoot);
-					
-					themeScene.setOnKeyPressed(themeEvent -> {
-						int themeTemp;
-						if (themeEvent.getCode() == KeyCode.UP) {
-							if (themeItem > 0) {
-								themeTemp = themeItem;
-								getThemeItem(themeItem - 1).setPrevActive(false);
-								getThemeItem(themeItem).setActive(false);
-								getThemeItem(--themeItem).setActive(true);
-								getThemeItem(themeTemp).setPrevActive(true);
-								// depends on how many choices there are on menu
-								if (themeTemp <= 2)
-									getMenuItem(++themeTemp).setPrevActive(false);
-
-							}
-						}
-
-						if (themeEvent.getCode() == KeyCode.DOWN) {
-							if (themeItem < themeBox.getChildren().size() - 1) {
-								themeTemp = themeItem;
-								getThemeItem(themeItem + 1).setPrevActive(false);
-								getThemeItem(themeItem).setActive(false);
-								getThemeItem(++themeItem).setActive(true);
-								getThemeItem(themeTemp).setPrevActive(true);
-								if (themeTemp >= 1)
-									getThemeItem(--themeTemp).setPrevActive(false);
-
-							}
-						}
-
-						if (themeEvent.getCode() == KeyCode.ENTER) {
-							
-							switch (getThemeItem(themeItem).getMenuName()) {
-								
-							case "THEME 1" :
-								System.out.println("Theme set to 1");
-								gui.setThemeNum(1);
-								break;
-								
-							case "THEME 2" :
-								System.out.println("Theme set to 2");
-								gui.setThemeNum(2);
-								break;
-								
-							case "THEME 3" :
-								
-								gui.setThemeNum(3);
-								break;
-								
-							case "THEME 4" :
-								
-								gui.setThemeNum(4);
-								break;
-								
-							
-							case "RETURN" :
-								try {
-									
-									start(stage);
-								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								break;
-							}
-							
-						}
-					});
-				//	System.out.println("how many");
-					stage.setScene(themeScene);
-					stage.show();
-					
-				} catch (Exception e) {
-					
-					e.printStackTrace();
-				}
-					
-				break;
+					break;
 
 				case "EXIT":
 					System.exit(0);
 				}
 			}
-		});	
-		stage.setScene(scene);
+		});
 
+		
+		
+		
+		stage.setScene(scene);
+		stage.initStyle(StageStyle.TRANSPARENT);
 		stage.show();
 	}
-	
-	
-	private Parent createTheme() {
-		
-		Pane root = new Pane ();
-		root.setPrefSize(900,600);
-		
-		// new Image(url)
-		Image image = new Image("http://i.imgur.com/AGTcz1a.jpg");
-		BackgroundImage background = new BackgroundImage(image, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
-				new BackgroundPosition(Side.LEFT, 0, true, Side.BOTTOM, 0, true), BackgroundSize.DEFAULT);
 
-//		ContentFrame frame = new ContentFrame(createMiddleContent());
-
-//		HBox hbox = new HBox(frame);
-		// space inbetween frames
-//		hbox.setTranslateX(120);
-//		hbox.setTranslateY(50);
-
-		MenuItem t1 = new MenuItem("THEME 1");
-		MenuItem t2 = new MenuItem("THEME 2");
-		MenuItem t3 = new MenuItem("THEME 3");
-		MenuItem t4 = new MenuItem("THEME 4");
-		MenuItem back = new MenuItem("RETURN");
-
-		themeBox = new VBox(10, t1, t2, t3, t4, back);
-		themeBox.setAlignment(Pos.TOP_CENTER);
-		themeBox.setTranslateX(360);
-		themeBox.setTranslateY(300);
-
-//		Text about = new Text("COMP2911 \nMenu Prototype");
-//		about.setTranslateX(50);
-//		about.setTranslateY(500);
-//		about.setFill(Color.WHITE);
-//		about.setFont(FONT);
-//		about.setOpacity(0.2);
-
-		getThemeItem(0).setActive(true);
-		root.setBackground(new Background(background));
-		root.getChildren().addAll(themeBox);
-		
-		return root;
-	}
 	// main layout of the menu with UI
-	private Parent createContent() {
-		Pane root = new Pane();
-		root.setPrefSize(900, 600);
-
-		// new Image(url)
-		Image image = new Image("http://www.relumination.com/wp-content/uploads/2016/07/warehouse-led.jpg");
-		BackgroundImage background = new BackgroundImage(image, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT,
-				new BackgroundPosition(Side.LEFT, 0, true, Side.BOTTOM, 0, true), BackgroundSize.DEFAULT);
-
-		ContentFrame frame = new ContentFrame(createMiddleContent());
-
-		HBox hbox = new HBox(frame);
-		// space inbetween frames
-		hbox.setTranslateX(120);
-		hbox.setTranslateY(50);
+	Parent createContent() {
+		StackPane root = new StackPane();
+		root.setPrefSize(500, 500);
 
 		MenuItem exit = new MenuItem("EXIT");
 		MenuItem play = new MenuItem("PLAY");
 		MenuItem sandbox = new MenuItem("SANDBOX MODE");
 		MenuItem options = new MenuItem("OPTIONS");
 
+		// Button exit = new Button("EXIT");
+		// Button play = new Button("PLAY");
+		// Button sandbox = new Button("SANDBOX");
+		// Button options = new Button("OPTIONS");
+
 		menuBox = new VBox(10, play, sandbox, options, exit);
-		menuBox.setAlignment(Pos.TOP_CENTER);
+		StackPane.setAlignment(menuBox, Pos.CENTER);
 		menuBox.setTranslateX(360);
 		menuBox.setTranslateY(300);
-
+		
+		
+		
+		
 		Text about = new Text("COMP2911 \nMenu Prototype");
 		about.setTranslateX(50);
 		about.setTranslateY(500);
@@ -293,32 +165,10 @@ public class Menu extends Application {
 		about.setFont(FONT);
 		about.setOpacity(0.2);
 
+		menuBox.setStyle("-fx-background-color: rgba(0, 0, 0, 0);");
 		getMenuItem(0).setActive(true);
-		root.setBackground(new Background(background));
-		root.getChildren().addAll(hbox, menuBox, about);
-		return root;
-	}
-
-	// middle panel content
-	private Node createMiddleContent() {
-		String title = "Box Pusher";
-		HBox letters = new HBox(0);
-		letters.setAlignment(Pos.CENTER);
-		for (int i = 0; i < title.length(); i++) {
-			Text letter = new Text(title.charAt(i) + "");
-			letter.setFont(FONT);
-			letter.setFill(Color.WHITE);
-			letters.getChildren().add(letter);
-
-			TranslateTransition tt = new TranslateTransition(Duration.seconds(2), letter);
-			tt.setDelay(Duration.millis(i * 50));
-			tt.setToY(-25);
-			tt.setAutoReverse(true);
-			tt.setCycleCount(TranslateTransition.INDEFINITE);
-			tt.play();
-		}
-
-		return letters;
+		root.getChildren().addAll(menuBox, about);
+		return menuBox;
 	}
 
 	private MenuItem getMenuItem(int index) {
@@ -326,45 +176,28 @@ public class Menu extends Application {
 			return null;
 		return (MenuItem) menuBox.getChildren().get(index);
 	}
-	private MenuItem getThemeItem(int index) {
-		if (index < 0)
-			return null;
-		return (MenuItem) themeBox.getChildren().get(index);
-	}
-
-	// pane with smoothed out edges
-	// took this design from the internet
-	private static class ContentFrame extends StackPane {
-		public ContentFrame(Node content) {
-			setAlignment(Pos.CENTER);
-
-			Rectangle frame = new Rectangle(200, 200);
-			frame.setArcWidth(25);
-			frame.setArcHeight(25);
-			frame.setStroke(Color.WHITESMOKE);
-
-			getChildren().addAll(frame, content);
-		}
-	}
 
 	private static class MenuItem extends HBox {
-
 		private Box bbLeft = new Box(40, 40, "PLAYER");
 		private Box boxLeft = new Box(40, 40, "BOX");
 		private Text text;
 		private String name;
-		
+
 		public MenuItem(String name) {
 
 			// constructor for distance between sprite and text
+
 			super(15);
+			Button button = new Button(name);
+			button.setId(name);
+			button.setOnAction(myHandler);
 			this.name = name;
 			setAlignment(Pos.CENTER_LEFT);
 
 			text = new Text(name);
 			text.setFont(FONT);
 
-			getChildren().addAll(bbLeft, boxLeft, text);
+			getChildren().addAll(bbLeft, boxLeft, button);
 			setPrevActive(false);
 			setActive(false);
 
@@ -383,24 +216,61 @@ public class Menu extends Application {
 			boxLeft.setVisible(b);
 			text.setFill(b ? Color.WHITE : Color.BISQUE);
 		}
-	}
 
-	private static class Box extends Parent {
-		Rectangle r;
+		private static class Box extends Parent {
+			Rectangle r;
 
-		public Box(int x, int y, String type) {
-			r = new Rectangle(x, y);
-			r.setStroke(Color.WHITE);
-			if (type.equals("BOX")) {
-				r.setFill(Color.BROWN);
-			} else if (type.equals("PLAYER"))
-				r.setFill(Color.BLUE);
+			public Box(int x, int y, String type) {
+				r = new Rectangle(x, y);
+				r.setStroke(Color.WHITE);
+				if (type.equals("BOX")) {
+					r.setFill(Color.BROWN);
+				} else if (type.equals("PLAYER"))
+					r.setFill(Color.BLUE);
+				getChildren().add(r);
+			}
 
-			getChildren().add(r);
 		}
 
-	}
+		final EventHandler<ActionEvent> myHandler = new EventHandler<ActionEvent>() {
 
-	
+			@Override
+			public void handle(final ActionEvent event) {
+				Button x = (Button) event.getSource();
+				switch (x.getId()) {
+				case "PLAY":
+					GUI gui = new GUI();
+					gui.setG("PLAY");
+					try {
+						MenuStage.setWidth(500);
+						MenuStage.setHeight(500);
+						gui.start(MenuStage);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					break;
+				case "SANDBOX MODE":
+					GUI guiU = new GUI();
+					guiU.setG("USER");
+					try {
+						guiU.start(MenuStage);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					}
+					break;
+
+				case "OPTIONS":
+					break;
+
+				case "EXIT":
+					System.exit(0);
+				}
+			}
+		};
+
+	}
 
 }
