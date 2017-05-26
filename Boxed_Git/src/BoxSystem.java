@@ -56,6 +56,7 @@ public class BoxSystem extends Application {
 	private String type = "";
 	public static boolean mainMenu = true;
 	public static Stage MenuStage;
+	public static boolean helpMenu = false;
 	
 	private Box[] boxes;
 	private Group playerGroup;
@@ -65,6 +66,8 @@ public class BoxSystem extends Application {
 	private Parent mRoot;
 	private IngameMenuButtonVersion im;
 	private Parent bRoot;
+	private Instructions ins;
+	private Parent iRoot;
 	
 	private PhongMaterial box;
 	private PhongMaterial floor;
@@ -102,11 +105,14 @@ public class BoxSystem extends Application {
 	@Override
 	public void start(Stage stage) throws IOException {
 		g = new Generator();
+		ins = new Instructions();
+		iRoot = ins.getGroup();
+		im = new IngameMenuButtonVersion(e->turnOnMenu(), e->turnOnHelp());
 		m = new Menu(e->turnOffMenu(), e->System.exit(0));
 		mRoot = m.getGroup();
-		
-		im = new IngameMenuButtonVersion(e->turnOnMenu(), e->System.out.println("Instructions"));
 		bRoot = im.getGroup();
+		
+		System.out.println(iRoot.toString());
 		
 		//Center text
 		text = new Text("");
@@ -150,8 +156,8 @@ public class BoxSystem extends Application {
 		notification.onClick(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent m) {
-				System.out.println("Howdy");
-				System.out.println("@159 settingRecord status:" + settingRecord);
+				if(mainMenu) turnOffMenu();
+				
 				if (!settingRecord) {
 					newLevel(record.seed);
 					settingRecord = true;
@@ -186,23 +192,17 @@ public class BoxSystem extends Application {
 		cameraTransition.setDuration(Duration.millis(400));
 		cameraTransition.setInterpolator(Interpolator.EASE_OUT);
 		
-		Vector2 cameraAnimStart = new Vector2(cameraHeight * sceneScale/2, -cameraHeight * sceneScale/2); //y z
+		Vector2 cameraAnimStart = new Vector2(cameraHeight * sceneScale, -cameraHeight * sceneScale); //y z
 		
-		//cameraRotation.setAxis(new Point3D(0, 0, 1));
+		cameraRotation.setAxis(new Point3D(0, 0, 1));
 		cameraRotation.setPivotY(-cameraAnimStart.y);
 		cameraRotation.setPivotZ(-cameraAnimStart.x);
 		
 		cameraAnimation = new Timeline(
 				new KeyFrame(Duration.ZERO, new KeyValue(cameraRotation.angleProperty(), 0)),
-				new KeyFrame(Duration.millis(3000), new KeyValue(cameraRotation.angleProperty(), 360)));
+				new KeyFrame(Duration.millis(50000), new KeyValue(cameraRotation.angleProperty(), 360)));
 		
 		cameraAnimation.setCycleCount(Timeline.INDEFINITE);
-		camera.getTransforms().add(cameraRotation);
-		cameraAnimation.playFromStart();
-		
-		camera.setTranslateX(-sceneScale * cameraHeight);
-		camera.setRotationAxis(new Point3D(0, 0,1));
-		camera.setRotate(-90);
 
 		//Create level
 		level = new Group();
@@ -220,7 +220,8 @@ public class BoxSystem extends Application {
 		StackPane pane = new StackPane();
 		
 		//Set translations for menu
-		pane.getChildren().addAll(subScene, time, text, bRoot, mRoot, notification);
+		pane.getChildren().addAll(subScene, time, text, bRoot, mRoot, iRoot, notification);
+		turnOffHelp();
 		mRoot.setTranslateY(200);
 		bRoot.setTranslateX(380);
 		bRoot.setTranslateY(0);
@@ -290,7 +291,7 @@ public class BoxSystem extends Application {
 	private void lost() {
 		if (settingRecord) {
 			timeline.stop();
-			text.setText("You lost to " + record.opponent);
+			if(!mainMenu) text.setText("You lost to " + record.opponent);
 			time.setVisible(false);
 
 			cachedLevels.setRecord(record.seed, record.time);
@@ -341,11 +342,11 @@ public class BoxSystem extends Application {
 	}
 
 	private void centreCamera(Vector2 pos) {
-		//cameraTransition.stop();
-		//cameraTransition.setToX(sceneScale * pos.x - sceneDimensions.x / 2.0 * camera.getScaleX());
-		//cameraTransition.setToY(sceneScale * pos.y - sceneDimensions.y / 2.0 * camera.getScaleY()
-				//+ (cameraAngle * cameraHeight * sceneScale) / (90 - cameraAngle));
-		//cameraTransition.play();
+		cameraTransition.stop();
+		cameraTransition.setToX(sceneScale * pos.x - sceneDimensions.x / 2.0 * camera.getScaleX());
+		cameraTransition.setToY(sceneScale * pos.y - sceneDimensions.y / 2.0 * camera.getScaleY()
+				+ (cameraAngle * cameraHeight * sceneScale) / (90 - cameraAngle));
+		cameraTransition.play();
 	}
 
 	private void createPlayerGroup(Vector2 start) {
@@ -452,14 +453,35 @@ public class BoxSystem extends Application {
 		edge.setSpecularPower(0);
 	}
 
+	public void turnOnHelp(){
+		iRoot.setVisible(true);
+		helpMenu = true;
+	}
+	
+	public void turnOffHelp(){
+		helpMenu = false;
+		iRoot.setVisible(false);
+	}
 
 	public void turnOnMenu() {
 		mainMenu = true;
+		if(settingRecord) lost();
 		mRoot.setVisible(true);
+		camera.getTransforms().add(cameraRotation);
+		camera.setTranslateX(-sceneScale * cameraHeight);
+		camera.setTranslateZ(0);
+		camera.setRotationAxis(new Point3D(0, 0,1));
+		camera.setRotate(-90);
+		cameraAnimation.playFromStart();
 	}
 
 	public void turnOffMenu() {
-		System.out.println("Howdy");
+		camera.getTransforms().remove(cameraRotation);
+		cameraAnimation.stop();
+		camera.setTranslateZ(-sceneScale * cameraHeight);
+		camera.setTranslateX(0);
+		camera.setRotationAxis(new Point3D(1, 0, 0));
+		camera.setRotate(cameraAngle);
 		mainMenu = false;
 		mRoot.setVisible(false);
 		newLevel();
@@ -507,13 +529,16 @@ public class BoxSystem extends Application {
 					case RIGHT: g.moveCharacter(Vector2.RIGHT); break;
 					case DOWN: g.moveCharacter(Vector2.UP); break;
 					case BACK_SPACE: g.undo();break;
-					case ENTER: lost();break;
+					case ENTER: newLevel();break;
 					case ESCAPE: turnOnMenu();break;
 					default:break;
 					}
-				} else if (mainMenu == true && key.getCode() == KeyCode.ESCAPE) {
+				} else if ((mainMenu == true || helpMenu == true) && key.getCode() == KeyCode.ESCAPE) {
 					turnOffMenu();
+					turnOffHelp();
 				}
+				
+					
 			}
 		});
 	}
